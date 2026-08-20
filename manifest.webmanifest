@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "Strahlemännkes Zug-App",
+  "short_name": "Strahlemännkes",
+  "description": "Getränkewünsche und Organisation des Schützenzugs Strahlemännkes.",
+  "lang": "de-DE",
+  "start_url": "/dashboard.php",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f8f7f3",
+  "theme_color": "#b5121b",
+  "icons": [
+    {"src":"/assets/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/assets/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/assets/icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Mein Getränk","short_name":"Getränk","url":"/member-drink.php","icons":[{"src":"/assets/icons/icon-192.png","sizes":"192x192"}]},
+    {"name":"Übersicht","short_name":"Start","url":"/dashboard.php","icons":[{"src":"/assets/icons/icon-192.png","sizes":"192x192"}]}
+  ]
+}
