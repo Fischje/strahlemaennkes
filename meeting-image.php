@@ -1,0 +1,2 @@
+<?php
+require_once __DIR__.'/includes/app.php';require_login();$q=$pdo->prepare('SELECT storage_name,mime_type FROM meeting_images WHERE id=?');$q->execute([(int)($_GET['id']??0)]);$f=$q->fetch();$path=$f?dirname(__DIR__).'/strahlemaennkes-private/meeting-images/'.$f['storage_name']:'';if(!$f||!is_file($path)){http_response_code(404);exit;}header('Content-Type: '.$f['mime_type']);header('Content-Length: '.filesize($path));header('X-Content-Type-Options: nosniff');header('Cache-Control: private, max-age=86400');readfile($path);

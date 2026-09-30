@@ -1,99 +1,74 @@
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT UNIQUE,
-    password_hash TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('member','spiess','admin')),
-    is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE DATABASE IF NOT EXISTS strahlemaennkes CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE strahlemaennkes;
+
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    email VARCHAR(190) NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    role ENUM('member','spiess','admin') NOT NULL DEFAULT 'member',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS fines (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    created_by INTEGER NOT NULL,
-    reason TEXT NOT NULL,
-    amount NUMERIC NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','paid','cancelled')),
-    occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+CREATE TABLE fines (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    amount DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+    status ENUM('open','paid','cancelled') NOT NULL DEFAULT 'open',
+    occurred_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_fines_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_fines_created_by FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS drinks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE COLLATE NOCASE,
-    emoji TEXT,
-    is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
-    is_approved INTEGER NOT NULL DEFAULT 1 CHECK (is_approved IN (0,1)),
-    created_by INTEGER,
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+CREATE TABLE drinks (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL UNIQUE,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order INT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS user_drink_preferences (
-    user_id INTEGER PRIMARY KEY,
-    drink_id INTEGER,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (drink_id) REFERENCES drinks(id) ON DELETE SET NULL
+CREATE TABLE drink_rounds (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    opened_by BIGINT UNSIGNED NOT NULL,
+    status ENUM('open','ordered','closed') NOT NULL DEFAULT 'open',
+    opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ordered_at DATETIME NULL,
+    closed_at DATETIME NULL,
+    CONSTRAINT fk_round_opened_by FOREIGN KEY (opened_by) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS drink_status_resets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    reset_by INTEGER NOT NULL,
-    reason TEXT,
-    reset_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (reset_by) REFERENCES users(id)
+CREATE TABLE drink_requests (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    round_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    drink_id INT UNSIGNED NOT NULL,
+    quantity TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    note VARCHAR(180) NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_round_user (round_id, user_id),
+    CONSTRAINT fk_request_round FOREIGN KEY (round_id) REFERENCES drink_rounds(id) ON DELETE CASCADE,
+    CONSTRAINT fk_request_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_request_drink FOREIGN KEY (drink_id) REFERENCES drinks(id)
 );
 
-CREATE TABLE IF NOT EXISTS drink_reminders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sent_by INTEGER NOT NULL,
-    target TEXT NOT NULL CHECK (target IN ('all_members','members_without_choice')),
-    message TEXT NOT NULL,
-    recipients_count INTEGER NOT NULL DEFAULT 0,
-    sent_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sent_by) REFERENCES users(id)
+CREATE TABLE chronicle_years (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    year SMALLINT UNSIGNED NOT NULL UNIQUE,
+    zugkoenig VARCHAR(180) NULL,
+    zugfuehrer VARCHAR(180) NULL,
+    kassierer VARCHAR(180) NULL,
+    schriftfuehrer VARCHAR(180) NULL,
+    erster_offizier VARCHAR(180) NULL,
+    zweiter_offizier VARCHAR(180) NULL,
+    notes TEXT NULL,
+    published TINYINT(1) NOT NULL DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS push_subscriptions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    endpoint TEXT NOT NULL UNIQUE,
-    p256dh TEXT NOT NULL,
-    auth_token TEXT NOT NULL,
-    user_agent TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_used_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS chronicle_years (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    year INTEGER NOT NULL UNIQUE,
-    zugkoenig TEXT,
-    zugfuehrer TEXT,
-    kassierer TEXT,
-    schriftfuehrer TEXT,
-    erster_offizier TEXT,
-    zweiter_offizier TEXT,
-    notes TEXT,
-    published INTEGER NOT NULL DEFAULT 1 CHECK (published IN (0,1))
-);
-
-CREATE INDEX IF NOT EXISTS idx_users_active ON users(is_active);
-CREATE INDEX IF NOT EXISTS idx_drinks_active_approved ON drinks(is_active, is_approved, sort_order);
-CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
-
-INSERT OR IGNORE INTO drinks(name, emoji, is_active, is_approved, sort_order) VALUES
-('Alt', '🍺', 1, 1, 10),
-('Pils', '🍻', 1, 1, 20),
-('Radler', '🍋', 1, 1, 30),
-('Cola', '🥤', 1, 1, 40),
-('Wasser', '💧', 1, 1, 50);
+-- Erweiterungsreserve: Termine und Stammtischplanung folgen als eigene Tabellen/Module.
