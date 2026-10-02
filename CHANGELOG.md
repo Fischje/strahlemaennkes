@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Stammtisch: Laufende Terminfindungen können jetzt von allen mit Verwaltungsrecht (Spieß, Zugführer, Kassierer, Schriftführer, Admin) bearbeitet werden: Überschrift, Ort, Bemerkung sowie Terminoptionen ändern, entfernen und ergänzen.
+- Stammtisch: Fehler behoben, bei dem eine leere dritte Terminoption als „heute 19:30“ in der Umfrage auftauchte.
+
 ## Beta 0.6.0 – 28.09.2026
 
 - Datenbank vollständig von SQLite auf PostgreSQL umgestellt.
