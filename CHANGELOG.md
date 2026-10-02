@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## Beta 0.7.1 – 02.10.2026
 
+- Version in der Fußzeile ist anklickbar und zeigt die letzten Änderungen (Changelog).
+- Stammtisch: Terminauswahl beim Festlegen wird mobil nicht mehr abgeschnitten.
 - Stammtisch: Wochentage und Monate in Terminangaben werden auf Deutsch statt Englisch angezeigt.
 - Stammtisch: Laufende Terminfindungen können jetzt von allen mit Verwaltungsrecht (Spieß, Zugführer, Kassierer, Schriftführer, Admin) bearbeitet werden: Überschrift, Ort, Bemerkung sowie Terminoptionen ändern, entfernen und ergänzen.
 - Stammtisch: Fehler behoben, bei dem eine leere dritte Terminoption als „heute 19:30“ in der Umfrage auftauchte.

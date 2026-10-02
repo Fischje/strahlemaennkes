@@ -263,6 +263,23 @@ function app_version(): array {
     return $version;
 }
 
+function app_changelog(int $limit=6): array {
+    $file = dirname(__DIR__) . '/CHANGELOG.md';
+    $lines = is_readable($file) ? file($file, FILE_IGNORE_NEW_LINES) : [];
+    $out = []; $cur = null;
+    foreach ($lines as $line) {
+        if (preg_match('/^##\s+(.+)$/u', $line, $m)) {
+            if ($cur !== null) $out[] = $cur;
+            if (count($out) >= $limit) { $cur = null; break; }
+            $cur = ['title' => trim($m[1]), 'items' => []];
+        } elseif ($cur !== null && preg_match('/^-\s+(.+)$/u', $line, $m)) {
+            $cur['items'][] = str_replace('`', '', trim($m[1]));
+        }
+    }
+    if ($cur !== null && count($out) < $limit) $out[] = $cur;
+    return $out;
+}
+
 function password_allowed_specials(): string {
     return '! # $ % & ( ) * + , - . / : ; < = > ? @ [ ] ^ _ { | } ~';
 }
