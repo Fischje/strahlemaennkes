@@ -395,7 +395,24 @@ function meeting_local_to_utc(string $date, string $time): ?string {
 }
 function meeting_display(?string $utc, string $format='l, d.m.Y · H:i'): string {
     if (!$utc) return '';
-    try { return (new DateTimeImmutable($utc, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Berlin'))->format($format); }
+    try {
+        $dt = (new DateTimeImmutable($utc, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Berlin'));
+        $days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+        $months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+        $map = [
+            'l' => $days[(int)$dt->format('w')],
+            'D' => substr($days[(int)$dt->format('w')], 0, 2),
+            'F' => $months[(int)$dt->format('n') - 1],
+            'M' => mb_substr($months[(int)$dt->format('n') - 1], 0, 3),
+        ];
+        $out = '';
+        for ($i = 0, $n = strlen($format); $i < $n; $i++) {
+            $c = $format[$i];
+            if ($c === '\\' && $i + 1 < $n) { $out .= $format[++$i]; continue; }
+            $out .= isset($map[$c]) ? $map[$c] : $dt->format($c);
+        }
+        return $out;
+    }
     catch (Throwable $e) { return ''; }
 }
 function meeting_local_input(?string $utc): string {
