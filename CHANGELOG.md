@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.2 – 07.10.2026
+
+- Stammtisch: In der Terminabstimmung gibt es jetzt immer die Auswahl „Ich kann an keinem der Termine“. Die Absagen sind für alle sichtbar.
+- Stammtisch: Die Abstimmung zeigt, wie viele Mitglieder schon abgestimmt haben und wer noch offen ist.
+
 ## Beta 0.7.1 – 02.10.2026
 
 - Version in der Fußzeile ist anklickbar und zeigt die letzten Änderungen (Changelog).
