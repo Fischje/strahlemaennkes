@@ -37,7 +37,7 @@ sudo -u postgres psql -d strahlemaennkes -c "SELECT version, applied_at FROM sch
 
 Erwartet wird `002_stammtisch_protocols.sql`. Diese Migration entfernt `news_posts` und legt alle Stammtisch-/Protokolltabellen an.
 
-4. Eine stündliche Erinnerung braucht diesen Cron-Eintrag (jede Minute ausführen; der Prozess verschickt nur im 55–65-Minuten-Fenster genau einmal):
+4. Eine stündliche Erinnerung braucht diesen Cron-Eintrag (jede Minute ausführen; der Prozess verschickt jede Erinnerung genau einmal: eine Woche vorher und am Tag selbst ab 9 Uhr sowie eine Stunde vorher im 55–65-Minuten-Fenster):
 
 ```cron
 * * * * * www-data /usr/bin/php /srv/strahlemaennkes/bin/send-meeting-reminders.php >> /var/log/strahlemaennkes-meeting-reminders.log 2>&1

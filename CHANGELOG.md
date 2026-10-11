@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.4 – 12.10.2026
+
+- Startseite: Der nächste Stammtisch (Datum, Uhrzeit, Ort) steht jetzt direkt unter der Begrüßung, ganz oben.
+- Stammtisch: Push-Erinnerung eine Woche vorher und am Tag des Stammtischs (jeweils ab 9 Uhr), zusätzlich zur Erinnerung eine Stunde vorher.
+- Startseite: Wer „Ich kann an keinem der Termine“ gewählt hat, gilt als abgestimmt.
+
 ## Beta 0.7.3 – 11.10.2026
 
 - Stammtisch: Beim festgelegten Termin wird unter Titel und Datum angezeigt, wer zugesagt hat, wer nicht kann und wer nicht abgestimmt hat.

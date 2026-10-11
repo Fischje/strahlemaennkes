@@ -28,6 +28,7 @@ $hasVoted=false;
 if($activeMeeting && $activeMeeting['status']==='poll'){
   $st=$pdo->prepare('SELECT 1 FROM meeting_votes v JOIN meeting_poll_options o ON o.id=v.option_id WHERE o.meeting_id=? AND v.user_id=? LIMIT 1');
   $st->execute([$activeMeeting['id'],(int)$u['id']]); $hasVoted=(bool)$st->fetchColumn();
+  if(!$hasVoted){$st=$pdo->prepare('SELECT 1 FROM meeting_poll_declines WHERE meeting_id=? AND user_id=?');$st->execute([$activeMeeting['id'],(int)$u['id']]);$hasVoted=(bool)$st->fetchColumn();}
 }
 
 $st=$pdo->prepare("
@@ -95,6 +96,19 @@ require __DIR__.'/includes/header.php';
         <?php endif;?>
       </div>
 
+        <?php if($activeMeeting): ?>
+        <div class="panel p-4 mb-4 dashboard-news-panel">
+          <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+            <div>
+              <?php if($activeMeeting['status']==='poll'): ?>
+                <h2 class="h5 fw-bold mb-1">📅 Terminfindung läuft</h2>
+                <div class="small text-secondary"><?= $hasVoted?'Du hast bereits abgestimmt.':'Deine Stimme fehlt noch.' ?> · <?=e($activeMeeting['title'])?></div>
+              <?php else: ?>
+                <h2 class="h5 fw-bold mb-1">🍻 Nächster Stammtisch</h2>
+                <div class="fw-semibold">📅 <?=e(meeting_display($activeMeeting['starts_at_utc']))?> Uhr</div>
+                <div class="small text-secondary"><?=e($activeMeeting['title'])?><?= $activeMeeting['location']?' · '.e($activeMeeting['location']):''?></div>
+              <?php endif; ?>
+
       <?php if($isOpsDashboard): ?>
         <div class="row g-3 mb-4 dashboard-ops-stats">
           <div class="col-sm-6">
@@ -121,17 +135,6 @@ require __DIR__.'/includes/header.php';
         </div>
       <?php endif; ?>
 
-        <?php if($activeMeeting): ?>
-        <div class="panel p-4 mb-4 dashboard-news-panel">
-          <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-            <div>
-              <?php if($activeMeeting['status']==='poll'): ?>
-                <h2 class="h5 fw-bold mb-1">📅 Terminfindung läuft</h2>
-                <div class="small text-secondary"><?= $hasVoted?'Du hast bereits abgestimmt.':'Deine Stimme fehlt noch.' ?> · <?=e($activeMeeting['title'])?></div>
-              <?php else: ?>
-                <h2 class="h5 fw-bold mb-1">🍻 Nächster Stammtisch</h2>
-                <div class="small text-secondary"><?=e($activeMeeting['title'])?> · <?=e(meeting_display($activeMeeting['starts_at_utc']))?> Uhr<?= $activeMeeting['location']?' · '.e($activeMeeting['location']):''?></div>
-              <?php endif; ?>
             </div>
             <a class="btn btn-sm btn-outline-secondary" href="/stammtisch.php"><?= $activeMeeting['status']==='poll'?'Abstimmen':'Ansehen' ?></a>
           </div>
