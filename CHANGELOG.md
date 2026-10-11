@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.5 – 13.10.2026
+
+- Stammtisch: Der Termin steht jetzt als dünne Zeile oben auf jeder Seite (wie Antreten und Sektbarmodus) statt als großer Kasten auf der Startseite.
+
 ## Beta 0.7.4 – 12.10.2026
 
 - Startseite: Der nächste Stammtisch (Datum, Uhrzeit, Ort) steht jetzt direkt unter der Begrüßung, ganz oben.

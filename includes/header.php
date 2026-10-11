@@ -102,6 +102,28 @@ header('Pragma: no-cache');
 <i class="bi bi-clock me-1"></i><strong>Antreten:</strong> <?=e($assemblyBanner['weekday_short'].', '.$assemblyBanner['display_date'])?> · <?=e($assemblyBanner['display_time'])?> Uhr · <strong>Ort:</strong> <?=e($assemblyBanner['location'])?> <i class="bi bi-chevron-right ms-1 assembly-topline-arrow"></i>
 </div></a>
 <?php endif; ?>
+<?php
+$stammtischBanner=null;
+if($u && !$sektbarBanner){
+  $smMeeting=active_meeting($pdo);
+  if($smMeeting && $smMeeting['status']==='poll'){
+    $q=$pdo->prepare('SELECT EXISTS(SELECT 1 FROM meeting_votes v JOIN meeting_poll_options o ON o.id=v.option_id WHERE o.meeting_id=? AND v.user_id=?) OR EXISTS(SELECT 1 FROM meeting_poll_declines WHERE meeting_id=? AND user_id=?)');
+    $q->execute([$smMeeting['id'],(int)$u['id'],$smMeeting['id'],(int)$u['id']]);
+    $stammtischBanner=['text'=>$q->fetchColumn()?'Terminfindung läuft – du hast abgestimmt':'Terminfindung läuft – deine Stimme fehlt noch','where'=>''];
+  } elseif($smMeeting && $smMeeting['status']==='scheduled' && $smMeeting['starts_at_utc']){
+    $startUtc=new DateTimeImmutable($smMeeting['starts_at_utc'],new DateTimeZone('UTC'));
+    if(new DateTimeImmutable('now',new DateTimeZone('UTC'))<$startUtc->modify('+4 hours')){
+      $local=$startUtc->setTimezone(new DateTimeZone('Europe/Berlin'));
+      $stammtischBanner=['text'=>german_weekday_short($local).', '.$local->format('d.m.Y · H:i').' Uhr','where'=>(string)$smMeeting['location']];
+    }
+  }
+}
+?>
+<?php if($stammtischBanner): ?>
+<a class="stammtisch-topline" href="/stammtisch.php" aria-label="Stammtisch-Details anzeigen"><div class="container">
+<strong>🍻 Stammtisch:</strong> <?=e($stammtischBanner['text'])?><?php if($stammtischBanner['where']!==''): ?> · <?=e($stammtischBanner['where'])?><?php endif; ?> <i class="bi bi-chevron-right ms-1 stammtisch-topline-arrow"></i>
+</div></a>
+<?php endif; ?>
 
 <main>
 <?php foreach(flashes() as $f): ?>

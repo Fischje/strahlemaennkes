@@ -1,2 +1,2 @@
 <?php
-return ['version'=>'0.7.4','label'=>'Beta 0.7.4','date'=>'12.10.2026','cache_key'=>'beta-0.7.4-20261012'];
+return ['version'=>'0.7.5','label'=>'Beta 0.7.5','date'=>'13.10.2026','cache_key'=>'beta-0.7.5-20261013'];
