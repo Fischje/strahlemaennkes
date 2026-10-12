@@ -59,15 +59,15 @@ header('Pragma: no-cache');
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1 py-2 py-lg-0">
         <?php if($u): ?>
           <li class="nav-item"><a class="nav-link" href="/dashboard.php">Übersicht</a></li>
-          <li class="nav-item"><a class="nav-link" href="/stammtisch.php">Stammtisch</a></li>
-          <li class="nav-item"><a class="nav-link" href="/protokolle.php">Protokolle</a></li>
           <li class="nav-item"><a class="nav-link" href="/member-drink.php">Mein Getränk</a></li>
-          <li class="nav-item"><a class="nav-link" href="/theke.php">Theke</a></li>
+          <li class="nav-item"><a class="nav-link" href="/stammtisch.php">Stammtisch</a></li>
           <li class="nav-item"><a class="nav-link" href="/fines.php">Runden</a></li>
-          <li class="nav-item"><a class="nav-link" href="/members.php">Mitglieder</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cash.php">Kasse</a></li>
+          <li class="nav-item"><a class="nav-link" href="/theke.php">Theke</a></li>
+          <li class="nav-item"><a class="nav-link" href="/protokolle.php">Protokolle</a></li>
           <li class="nav-item"><a class="nav-link" href="/antreten.php">Antreten</a></li>
           <li class="nav-item"><a class="nav-link" href="/public/chronik.php">Chronik</a></li>
+          <li class="nav-item"><a class="nav-link" href="/members.php">Mitglieder</a></li>
+          <li class="nav-item"><a class="nav-link" href="/cash.php">Kasse</a></li>
           <?php
             $showFunctions = can_act_as_spiess($pdo,$u) || can_manage_spiess_delegation()
               || can_manage_assembly() || can_edit_chronicle() || has_role('admin') || sektbar_is_enabled($pdo);

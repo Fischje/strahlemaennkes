@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.7 – 12.10.2026
+
+- Menü: Neue Reihenfolge – Übersicht, Mein Getränk, Stammtisch, Runden, Theke, Protokolle, Antreten, Chronik, Mitglieder, Kasse, Funktionen (Kopfleiste und Seitenmenü).
+
 ## Beta 0.7.6 – 12.10.2026
 
 - Stammtisch: Die Reihenfolge der Tagesordnungspunkte lässt sich jetzt auch am Smartphone ändern, über Pfeil-Knöpfe ▲ ▼ an jedem TOP (Ziehen funktioniert auf Touch-Geräten nicht).

@@ -18,16 +18,15 @@ function side_active(string $path, string $current): string { return $path === $
     </div>
 
     <a class="<?= side_active('/dashboard.php',$sidePath) ?>" href="/dashboard.php"><i class="bi bi-grid"></i> Übersicht</a>
-    <a class="<?= side_active('/stammtisch.php',$sidePath) ?>" href="/stammtisch.php"><i class="bi bi-calendar2-check"></i> Stammtisch</a>
-    <a class="<?= side_active('/protokolle.php',$sidePath) ?>" href="/protokolle.php"><i class="bi bi-journal-text"></i> Protokolle</a>
     <a class="<?= side_active('/member-drink.php',$sidePath) ?>" href="/member-drink.php"><i class="bi bi-cup-straw"></i> Mein Getränk</a>
-
-    <a class="<?= side_active('/theke.php',$sidePath) ?>" href="/theke.php"><i class="bi bi-list-check"></i> Thekenansicht</a>
+    <a class="<?= side_active('/stammtisch.php',$sidePath) ?>" href="/stammtisch.php"><i class="bi bi-calendar2-check"></i> Stammtisch</a>
     <a class="<?= side_active('/fines.php',$sidePath) ?>" href="/fines.php"><i class="bi bi-receipt"></i> Runden</a>
-    <a class="<?= side_active('/members.php',$sidePath) ?>" href="/members.php"><i class="bi bi-people"></i> Mitglieder</a>
-    <a class="<?= side_active('/cash.php',$sidePath) ?>" href="/cash.php"><i class="bi bi-cash-coin"></i> Kasse</a>
+    <a class="<?= side_active('/theke.php',$sidePath) ?>" href="/theke.php"><i class="bi bi-list-check"></i> Thekenansicht</a>
+    <a class="<?= side_active('/protokolle.php',$sidePath) ?>" href="/protokolle.php"><i class="bi bi-journal-text"></i> Protokolle</a>
     <a class="<?= side_active('/antreten.php',$sidePath) ?>" href="/antreten.php"><i class="bi bi-clock"></i> Antreten</a>
     <a class="<?= side_active('/public/chronik.php',$sidePath) ?>" href="/public/chronik.php"><i class="bi bi-book"></i> Chronik</a>
+    <a class="<?= side_active('/members.php',$sidePath) ?>" href="/members.php"><i class="bi bi-people"></i> Mitglieder</a>
+    <a class="<?= side_active('/cash.php',$sidePath) ?>" href="/cash.php"><i class="bi bi-cash-coin"></i> Kasse</a>
     <?php
       $showSideFunctions = can_act_as_spiess($pdo,$sideUser) || can_manage_spiess_delegation()
         || can_manage_assembly() || can_edit_chronicle() || has_role('admin') || sektbar_is_enabled($pdo);
