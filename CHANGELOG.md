@@ -2,6 +2,10 @@
 
 ## Beta 0.7.7 – 12.10.2026
 
+- Stammtisch: Beim festgelegten Termin kann jedes Mitglied jederzeit „Ich komme“ oder „Ich komme nicht“ wählen und das später ändern. Die Listen Können / Können nicht / Nicht abgestimmt passen sich sofort an.
+
+## Beta 0.7.7 – 12.10.2026
+
 - Menü: Neue Reihenfolge – Übersicht, Mein Getränk, Stammtisch, Runden, Theke, Protokolle, Antreten, Chronik, Mitglieder, Kasse, Funktionen (Kopfleiste und Seitenmenü).
 
 ## Beta 0.7.6 – 12.10.2026
