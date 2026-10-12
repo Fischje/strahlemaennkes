@@ -1,6 +1,10 @@
 # Changelog
 
-## Beta 0.7.5 – 13.10.2026
+## Beta 0.7.6 – 12.10.2026
+
+- Stammtisch: Die Reihenfolge der Tagesordnungspunkte lässt sich jetzt auch am Smartphone ändern, über Pfeil-Knöpfe ▲ ▼ an jedem TOP (Ziehen funktioniert auf Touch-Geräten nicht).
+
+## Beta 0.7.5 – 12.10.2026
 
 - Stammtisch: Der Termin steht jetzt als dünne Zeile oben auf jeder Seite (wie Antreten und Sektbarmodus) statt als großer Kasten auf der Startseite.
 
