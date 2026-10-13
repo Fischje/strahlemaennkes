@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.8 – 13.10.2026
+
+- Popups (z. B. Changelog) am Smartphone: gut sichtbares Schließen-X, Sicherheitsabstand zu Statusleiste und Home-Balken, im Changelog zusätzlich ein Schließen-Knopf unten.
+
 ## Beta 0.7.7 – 12.10.2026
 
 - Stammtisch: Beim festgelegten Termin kann jedes Mitglied jederzeit „Ich komme“ oder „Ich komme nicht“ wählen und das später ändern. Die Listen Können / Können nicht / Nicht abgestimmt passen sich sofort an.

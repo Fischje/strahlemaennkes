@@ -1060,3 +1060,9 @@ button.version-note { font:inherit; cursor:pointer; } button.version-note:hover 
 .stammtisch-topline:hover,.stammtisch-topline:focus{color:#fff!important;background:#c1232b;text-decoration:none}
 .stammtisch-topline-arrow{font-size:.68rem;opacity:.8}
 @media(max-width:575.98px){.stammtisch-topline{font-size:.72rem}}
+
+/* Beta 0.7.8: Popups auf dem Smartphone: Sicherheitsabstand (Statusleiste/Home-Balken), gut sichtbares Schließen-X */
+.modal { --bs-modal-margin:1rem; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+.modal .btn-close { opacity:.95; padding:.9rem; margin:-.4rem -.4rem -.4rem auto; background-size:1.1rem; }
+.modal .btn-close:hover, .modal .btn-close:focus { opacity:1; }
+@media(max-width:575.98px){ .modal { --bs-modal-margin:1.25rem; } }

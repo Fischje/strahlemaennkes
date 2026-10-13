@@ -1,4 +1,4 @@
-const CACHE='sm-static-beta-0.7.7';
+const CACHE='sm-static-beta-0.7.8';
 const STATIC=[
   '/offline.html',
   '/assets/css/app.css',
