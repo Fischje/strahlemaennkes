@@ -110,6 +110,8 @@ if($u && !$sektbarBanner){
     $q=$pdo->prepare('SELECT EXISTS(SELECT 1 FROM meeting_votes v JOIN meeting_poll_options o ON o.id=v.option_id WHERE o.meeting_id=? AND v.user_id=?) OR EXISTS(SELECT 1 FROM meeting_poll_declines WHERE meeting_id=? AND user_id=?)');
     $q->execute([$smMeeting['id'],(int)$u['id'],$smMeeting['id'],(int)$u['id']]);
     $stammtischBanner=['text'=>$q->fetchColumn()?'Terminfindung läuft – du hast abgestimmt':'Terminfindung läuft – deine Stimme fehlt noch','where'=>''];
+  } elseif($smMeeting && $smMeeting['status']==='running'){
+    $stammtischBanner=['text'=>'läuft gerade – Protokoll wird geschrieben','where'=>''];
   } elseif($smMeeting && $smMeeting['status']==='scheduled' && $smMeeting['starts_at_utc']){
     $startUtc=new DateTimeImmutable($smMeeting['starts_at_utc'],new DateTimeZone('UTC'));
     if(new DateTimeImmutable('now',new DateTimeZone('UTC'))<$startUtc->modify('+4 hours')){

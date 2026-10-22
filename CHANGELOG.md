@@ -1,5 +1,12 @@
 # Changelog
 
+## Beta 0.7.10 – 22.10.2026
+
+- Stammtisch läuft jetzt in drei festen Phasen: 1. Terminabstimmung, 2. Tagesordnung sammeln und Termin festlegen, 3. Stammtisch mit Protokoll. Eine Phasenanzeige oben zeigt, wo man steht.
+- Phase 2: Es werden nur Tagesordnungspunkte als Überschriften gesammelt (Vorschläge ohne Zusatztext, Übernehmen/Ablehnen durch die Verwaltung). Protokoll, Anwesenheit und Abschließen gibt es hier noch nicht.
+- Phase 3: Zugführer, Spieß, Schriftführer oder Admin starten den Stammtisch („Stammtisch starten“). Erst dann kann das Protokoll je Tagesordnungspunkt geschrieben, die Anwesenheit gepflegt (vorbelegt aus den Zusagen) und der Stammtisch abgeschlossen werden. Ein wieder geöffnetes Protokoll geht zurück in Phase 3.
+- Die Zeile oben und die Startseite zeigen „Stammtisch läuft“, solange das Protokoll geführt wird.
+
 ## Beta 0.7.9 – 22.10.2026
 
 - Stammtisch: Zugführer und Admin können in der Terminfindung und beim festgelegten Termin für andere Mitglieder eintragen, ob sie kommen oder nicht (auch nachträglich ändern).

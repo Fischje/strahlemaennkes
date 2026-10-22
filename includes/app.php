@@ -104,6 +104,7 @@ function is_secretary(): bool { $u=current_user(); return (bool)($u && !empty($u
 function can_manage_protocols(): bool { return has_role('admin','spiess') || is_secretary() || is_treasurer() || is_leader(); }
 function can_create_meetings(PDO $pdo, ?array $user=null): bool { return can_act_as_spiess($pdo,$user) || is_treasurer() || is_leader(); }
 function can_manage_meetings(PDO $pdo, ?array $user=null): bool { return can_create_meetings($pdo,$user) || is_secretary(); }
+function can_run_protocol(PDO $pdo, ?array $user=null): bool { return is_leader() || is_secretary() || can_act_as_spiess($pdo,$user); }
 function can_reopen_protocols(): bool { return has_role('admin') || is_secretary(); }
 function can_edit_chronicle(): bool { return has_role('spiess','admin') || is_leader(); }
 function can_manage_assembly(): bool { return has_role('admin') || is_leader(); }
@@ -438,7 +439,7 @@ function meeting_local_input(?string $utc): string {
     catch (Throwable $e) { return ''; }
 }
 function active_meeting(PDO $pdo): ?array {
-    $row=$pdo->query("SELECT * FROM meetings WHERE status IN ('poll','scheduled') ORDER BY id DESC LIMIT 1")->fetch();
+    $row=$pdo->query("SELECT * FROM meetings WHERE status IN ('poll','scheduled','running') ORDER BY id DESC LIMIT 1")->fetch();
     return $row ?: null;
 }
 function meeting_audit(PDO $pdo, int $meetingId, int $userId, string $event, ?string $details=null): void {

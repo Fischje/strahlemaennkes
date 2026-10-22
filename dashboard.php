@@ -130,7 +130,7 @@ require __DIR__.'/includes/header.php';
                 <h2 class="h5 fw-bold mb-1">📅 Terminfindung läuft</h2>
                 <div class="small text-secondary"><?= $hasVoted?'Du hast bereits abgestimmt.':'Deine Stimme fehlt noch.' ?> · <?=e($activeMeeting['title'])?></div>
               <?php else: ?>
-                <h2 class="h5 fw-bold mb-1">🍻 Nächster Stammtisch</h2>
+                <h2 class="h5 fw-bold mb-1"><?= $activeMeeting['status']==='running'?'🍻 Stammtisch läuft gerade':'🍻 Nächster Stammtisch' ?></h2>
                 <div class="small text-secondary"><?=e($activeMeeting['title'])?> · <?=e(meeting_display($activeMeeting['starts_at_utc']))?> Uhr<?= $activeMeeting['location']?' · '.e($activeMeeting['location']):''?></div>
               <?php endif; ?>
             </div>
