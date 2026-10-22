@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.9 – 22.10.2026
+
+- Stammtisch: Zugführer und Admin können in der Terminfindung und beim festgelegten Termin für andere Mitglieder eintragen, ob sie kommen oder nicht (auch nachträglich ändern).
+
 ## Beta 0.7.8 – 13.10.2026
 
 - Popups (z. B. Changelog) am Smartphone: gut sichtbares Schließen-X, Sicherheitsabstand zu Statusleiste und Home-Balken, im Changelog zusätzlich ein Schließen-Knopf unten.
