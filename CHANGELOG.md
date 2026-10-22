@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.11 – 22.10.2026
+
+- Der Schalter für die Selbstregistrierung ist von „Mitglieder“ nach „Funktionen“ → „Freischaltungen“ umgezogen.
+
 ## Beta 0.7.10 – 22.10.2026
 
 - Stammtisch läuft jetzt in drei festen Phasen: 1. Terminabstimmung, 2. Tagesordnung sammeln und Termin festlegen, 3. Stammtisch mit Protokoll. Eine Phasenanzeige oben zeigt, wo man steht.

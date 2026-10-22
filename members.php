@@ -64,15 +64,6 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         redirect('/members.php');
     }
 
-    if($action==='toggle_registration'){
-        $enabled=!empty($_POST['enabled']);
-        set_app_setting($pdo,'registration_enabled',$enabled ? '1' : '0',(int)$u['id']);
-        flash('success',$enabled
-            ? 'Selbstregistrierung wurde aktiviert.'
-            : 'Selbstregistrierung wurde deaktiviert.');
-        redirect('/members.php');
-    }
-
     if($action==='toggle'){
         $id=(int)$_POST['id'];
         if($id===$u['id']){
@@ -86,7 +77,6 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 }
 
 $users=$pdo->query('SELECT id,username,email,first_name,last_name,role,is_treasurer,is_leader,is_secretary,must_change_password,is_active,created_at FROM users ORDER BY last_name,first_name')->fetchAll();
-$registrationEnabled=$isAdmin ? public_registration_enabled($pdo) : false;
 $pageTitle='Mitglieder';
 require __DIR__.'/includes/header.php';
 ?>
@@ -103,31 +93,6 @@ require __DIR__.'/includes/header.php';
       <button class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#userModal" data-mode="create"><i class="bi bi-person-plus me-1"></i> Mitglied anlegen</button>
     <?php endif; ?>
   </div>
-
-  <?php if($isAdmin): ?>
-    <div class="panel p-4 mb-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <div>
-          <div class="eyebrow">Registrierung</div>
-          <h2 class="h5 fw-bold mb-1">Selbstregistrierung neuer Mitglieder</h2>
-          <p class="text-secondary mb-0">Wenn aktiviert, erscheint auf der Login-Seite ein Registrierungslink. Neue Accounts werden ausschließlich als normale Mitglieder angelegt.</p>
-        </div>
-        <form method="post" class="d-flex align-items-center gap-3">
-          <input type="hidden" name="csrf" value="<?=e(csrf_token())?>">
-          <input type="hidden" name="action" value="toggle_registration">
-          <div class="form-check form-switch fs-5 mb-0">
-            <input class="form-check-input" type="checkbox" role="switch" name="enabled" value="1" id="registrationEnabled" <?=$registrationEnabled?'checked':''?> onchange="this.form.submit()">
-            <label class="form-check-label fs-6" for="registrationEnabled"><?=$registrationEnabled?'Aktiv':'Aus'?></label>
-          </div>
-        </form>
-      </div>
-      <?php if($registrationEnabled): ?>
-        <div class="alert alert-success mt-3 mb-0 py-2"><i class="bi bi-person-plus me-1"></i> Registrierung ist aktuell geöffnet.</div>
-      <?php else: ?>
-        <div class="alert alert-secondary mt-3 mb-0 py-2">Registrierung ist aktuell geschlossen.</div>
-      <?php endif;?>
-    </div>
-  <?php endif; ?>
 
   <div class="panel p-4">
     <?php if(!$isAdmin): ?>
