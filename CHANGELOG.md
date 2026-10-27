@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.24 – 27.10.2026
+
+- Getränke: Die Stern-Kreise für Favoriten waren noch schwarz und sind jetzt hell (Favorit: gelb). Auch Mitgliederkarten und der Texteditor hatten noch dunkle Flächen und sind angepasst.
+
 ## Beta 0.7.23 – 27.10.2026
 
 - Rundungen von Karten, Knöpfen und Eingabefeldern um 2 px erhöht (Karten 6 px, Knöpfe und Felder 5 px).
