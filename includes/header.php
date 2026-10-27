@@ -30,6 +30,7 @@ header('Pragma: no-cache');
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="/assets/css/app.css?v=<?= e($version['cache_key']) ?>">
+  <link rel="stylesheet" href="/assets/css/theme-d.css?v=<?= e($version['cache_key']) ?>">
 </head>
 <body class="<?= trim(($u ? 'has-mobile-nav ' : '') . ($bodyClass ?? '')) ?>">
 <nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">

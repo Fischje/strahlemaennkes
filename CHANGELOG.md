@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.19 – 27.10.2026
+
+- Neues Design „D“: Die App ist jetzt hell und freundlich (Creme-Hintergrund, weiße Karten mit schwarzem Text, Vereinsrot als Akzent, gelbe Stammtisch-Zeile) statt dunkel. Karten, Knöpfe und Eingabefelder haben nur noch minimale Rundungen. Die bisherigen Schriften bleiben. Das Design liegt in der Datei assets/css/theme-d.css und lässt sich dort abschalten.
+
 ## Beta 0.7.18 – 27.10.2026
 
 - Startseite: Der große Push-Kasten ist durch einen kleinen Hinweis mit Link zu „Einstellungen“ ersetzt. Push wird nur noch dort eingestellt.

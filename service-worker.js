@@ -1,7 +1,8 @@
-const CACHE='sm-static-beta-0.7.18';
+const CACHE='sm-static-beta-0.7.19';
 const STATIC=[
   '/offline.html',
   '/assets/css/app.css',
+  '/assets/css/theme-d.css',
   '/assets/js/app.js',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
