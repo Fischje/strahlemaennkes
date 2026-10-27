@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.22 – 27.10.2026
+
+- Handy: Das Logo hat oben 10 px Abstand zur Statusleiste. Logo, Name, Benutzerknopf und Menü stehen jetzt in einer Zeile statt in zwei.
+- Schrift: Das Schwarz der Texte ist etwa 8 % in Richtung Weiß aufgehellt (#212429).
+
 ## Beta 0.7.21 – 27.10.2026
 
 - Seitenabstand: Texte und Karten kleben am Handy nicht mehr am linken und rechten Rand, sondern haben etwa 12 px Abstand.

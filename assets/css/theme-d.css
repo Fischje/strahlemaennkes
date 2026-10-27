@@ -8,7 +8,11 @@
   --sm-bg: #F8F6F2;
   --sm-surface: #FFFFFF;
   --sm-surface-2: #F3EFE8;
-  --sm-text: #0E1116;
+  --sm-text: #212429;
+  --sm-black: #2A2B2D;
+  --bs-body-color: #212429;
+  --bs-emphasis-color: #212429;
+  --bs-heading-color: #212429;
   --sm-muted: #5B6472;
   --sm-border-dark: #E4DED2;
   --sm-border: #E4DED2;
@@ -59,9 +63,9 @@ hr { border-color: var(--sm-border-dark); opacity:1; }
 .online-dot { box-shadow:0 0 0 3px rgba(111,168,42,.18); }
 
 /* Hinweiszeilen unter der Kopfleiste: schmal und eckig */
-.stammtisch-topline { background:#FFD93B; color:#0E1116 !important; border-bottom:1px solid rgba(14,17,22,.15); }
-.stammtisch-topline:hover, .stammtisch-topline:focus { background:#F5CB1F; color:#0E1116 !important; }
-.assembly-topline { background:#0E1116; color:#fff !important; border-bottom:0; }
+.stammtisch-topline { background:#FFD93B; color:#212429 !important; border-bottom:1px solid rgba(14,17,22,.15); }
+.stammtisch-topline:hover, .stammtisch-topline:focus { background:#F5CB1F; color:#212429 !important; }
+.assembly-topline { background:#212429; color:#fff !important; border-bottom:0; }
 .assembly-topline:hover, .assembly-topline:focus { background:#1E242C; color:#fff !important; }
 
 /* ---------- Karten und Boxen ---------- */
@@ -107,7 +111,7 @@ hr { border-color: var(--sm-border-dark); opacity:1; }
 .btn-outline-danger { color:var(--sm-red); border-color:#E3A6AA; background:#fff; }
 .btn-outline-danger:hover, .btn-outline-danger:focus { color:#fff; background:var(--sm-red); border-color:var(--sm-red); }
 .btn-outline-success { color:#3F6212; border-color:#A9CC7A; background:#fff; }
-.btn-outline-success:hover, .btn-outline-success:focus { color:#0E1116; background:#B9DC79; border-color:#B9DC79; }
+.btn-outline-success:hover, .btn-outline-success:focus { color:#212429; background:#B9DC79; border-color:#B9DC79; }
 .btn-light { background:#fff; color:var(--sm-text); border-color:var(--sm-border-dark); }
 .btn-close { filter:none; }
 .modal .btn-close { filter:none; opacity:.7; }
@@ -141,7 +145,7 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):hover { color:var(--sm-red-dark);
 .badge { border-radius:var(--sm-radius); }
 .badge.text-bg-secondary { background:#E4DED2 !important; color:#2B323D !important; }
 .modal-header, .modal-footer { border-color:var(--sm-border-dark); }
-.modal-backdrop { --bs-backdrop-bg:#0E1116; }
+.modal-backdrop { --bs-backdrop-bg:#212429; }
 .progress { background:#E9E3D7; border-radius:var(--sm-radius); }
 code, kbd { color:var(--sm-red); background:#F3EFE8; border-radius:var(--sm-radius); padding:.1rem .3rem; }
 details > summary { cursor:pointer; }
@@ -193,7 +197,7 @@ a { text-decoration-color:currentColor; }
 .navbar-brand strong { color:var(--sm-text); }
 .hero h1, .public-hero h1 { color:var(--sm-text); }
 .hero .lead, .public-hero .lead { color:var(--sm-muted); }
-.stammtisch-topline, .stammtisch-topline:hover, .stammtisch-topline:focus { color:#0E1116 !important; }
+.stammtisch-topline, .stammtisch-topline:hover, .stammtisch-topline:focus { color:#212429 !important; }
 .function-card, .function-card strong { color:var(--sm-text) !important; }
 .function-card .text-secondary { color:var(--sm-muted) !important; }
 
@@ -245,3 +249,22 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 /* ---------- Seitenabstand: Inhalt klebt nicht mehr am Rand (app.css setzte padding:2rem 0 und nahm dem Container den seitlichen Abstand) ---------- */
 .dashboard-shell { padding-left:calc(var(--bs-gutter-x, 1.5rem) * .5); padding-right:calc(var(--bs-gutter-x, 1.5rem) * .5); }
 @media (max-width:575.98px){ .container { --bs-gutter-x:1.5rem; } }
+
+/* ---------- Handy: Kopfleiste in einer Zeile, 10 px Luft nach oben ---------- */
+@media (max-width:991.98px){
+  .app-navbar { padding-top:calc(env(safe-area-inset-top, 0px) + 10px) !important; }
+}
+@media (max-width:575.98px){
+  .app-navbar > .container { gap:.25rem; }
+  .app-navbar .navbar-brand { margin-right:0; min-width:0; flex:0 1 auto; }
+  .app-navbar .navbar-brand strong { font-size:.95rem; white-space:nowrap; }
+  .header-club-logo { height:38px; }
+  .user-menu-button { max-width:120px; padding:.3rem .5rem; font-size:.82rem; }
+  .app-navbar .navbar-toggler { padding:.3rem .5rem; }
+}
+@media (max-width:389.98px){
+  .app-navbar .navbar-brand strong { font-size:.82rem; }
+  .header-club-logo { height:34px; }
+  .app-navbar .online-dot { display:none; }
+  .user-menu-button { max-width:96px; }
+}
