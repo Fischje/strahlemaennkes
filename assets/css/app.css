@@ -1070,3 +1070,34 @@ button.version-note { font:inherit; cursor:pointer; } button.version-note:hover 
 /* Beta 0.7.12: Hinweiszeilen (Antreten/Sektbar/Stammtisch) liegen im Seitenfluss unter der Navigation und nicht darüber */
 .app-navbar { z-index:1050; }
 .assembly-topline, .stammtisch-topline, .sektbar-topline { position:relative; z-index:1; }
+
+/* Beta 0.7.17: lebendigere Oberfläche – weiche Übergänge, sanftes Einblenden, Rückmeldung bei Aktionen */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes smFadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  @keyframes smPop { 0% { transform:scale(.85); } 60% { transform:scale(1.12); } 100% { transform:scale(1); } }
+  @keyframes smGrow { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+  @keyframes smSlideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
+  @keyframes smPulse { 0%,100% { box-shadow:0 0 0 0 rgba(216,41,50,.45); } 50% { box-shadow:0 0 0 6px rgba(216,41,50,0); } }
+
+  main .panel, main .function-card { animation:smFadeUp .45s ease backwards; }
+  main .panel:nth-of-type(2) { animation-delay:.05s; }
+  main .panel:nth-of-type(3) { animation-delay:.1s; }
+  main .panel:nth-of-type(4) { animation-delay:.15s; }
+  main .panel:nth-of-type(n+5) { animation-delay:.2s; }
+  .alert { animation:smSlideIn .35s ease backwards; }
+  .form-check-input:checked { animation:smPop .25s ease; }
+  .vote-bar { transform-origin:left center; animation:smGrow .7s ease backwards; }
+  .badge.text-bg-danger { animation:smPulse 2.4s ease-in-out infinite; }
+  .dropdown-menu.show { animation:smSlideIn .18s ease backwards; }
+}
+.panel, .function-card, .btn, .nav-link, .side-nav a, .mobile-bottom-nav a, .form-control, .form-select { transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease; }
+a.panel:hover, .function-card:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.28); }
+.btn:hover:not(:disabled) { transform:translateY(-1px); }
+.btn:active:not(:disabled) { transform:translateY(0) scale(.97); }
+.side-nav a:hover { transform:translateX(3px); }
+.mobile-bottom-nav a:active { transform:scale(.92); }
+.form-check.border:hover { border-color:rgba(216,41,50,.6) !important; background-color:rgba(216,41,50,.06); }
+.vote-option { position:relative; overflow:hidden; cursor:pointer; }
+.vote-option > .vote-bar { position:absolute; left:0; top:0; bottom:0; background:rgba(216,41,50,.16); pointer-events:none; }
+.vote-option > .vote-bar-none { background:rgba(150,150,150,.16); }
+.vote-option > :not(.vote-bar) { position:relative; z-index:1; }

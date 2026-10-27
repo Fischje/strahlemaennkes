@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.17 – 27.10.2026
+
+- Lebendigere Oberfläche: Karten blenden sanft ein, Knöpfe und Menüs reagieren mit weichen Übergängen, Karten heben sich beim Darüberfahren an, Häkchen „poppen“, Hinweise gleiten ein. Bei der Terminabstimmung zeigen Balken hinter den Terminen, wie viele schon dafür gestimmt haben. Wer „Bewegung reduzieren“ am Gerät eingestellt hat, bekommt keine Animationen.
+
 ## Beta 0.7.16 – 27.10.2026
 
 - Neu unter „Funktionen“ (vorerst nur Admin): Kirmes-Planung. Je Tag Antreten (Uhrzeit, Treffpunkt), Kleidung und Mitbringsel; vergangene Tage klappen weg.
