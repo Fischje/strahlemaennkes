@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.23 – 27.10.2026
+
+- Rundungen von Karten, Knöpfen und Eingabefeldern um 2 px erhöht (Karten 6 px, Knöpfe und Felder 5 px).
+
 ## Beta 0.7.22 – 27.10.2026
 
 - Handy: Das Logo hat oben 10 px Abstand zur Statusleiste. Logo, Name, Benutzerknopf und Menü stehen jetzt in einer Zeile statt in zwei.

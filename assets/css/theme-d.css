@@ -19,8 +19,8 @@
   --sm-panel: #FFFFFF;
   --sm-red: #B5121B;
   --sm-red-dark: #8F0E15;
-  --sm-radius: 3px;
-  --sm-radius-lg: 4px;
+  --sm-radius: 5px;
+  --sm-radius-lg: 6px;
   --sm-shadow: 0 1px 1px rgba(14,17,22,.04), 0 22px 44px -28px rgba(14,17,22,.30);
   --sm-glow: 0 10px 28px -10px rgba(181,18,27,.55), 0 6px 34px -8px rgba(255,217,59,.35);
 }
