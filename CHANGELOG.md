@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.18 – 27.10.2026
+
+- Startseite: Der große Push-Kasten ist durch einen kleinen Hinweis mit Link zu „Einstellungen“ ersetzt. Push wird nur noch dort eingestellt.
+
 ## Beta 0.7.17 – 27.10.2026
 
 - Lebendigere Oberfläche: Karten blenden sanft ein, Knöpfe und Menüs reagieren mit weichen Übergängen, Karten heben sich beim Darüberfahren an, Häkchen „poppen“, Hinweise gleiten ein. Bei der Terminabstimmung zeigen Balken hinter den Terminen, wie viele schon dafür gestimmt haben. Wer „Bewegung reduzieren“ am Gerät eingestellt hat, bekommt keine Animationen.

@@ -195,7 +195,7 @@ require __DIR__.'/includes/header.php';
           <?php endif;?>
         </div>
 
-      <?php require __DIR__.'/includes/push-status-card.php'; ?>
+      <p class="small text-secondary mt-4 mb-0"><i class="bi bi-bell me-1"></i>Push-Benachrichtigungen kannst du unter <a href="/settings.php">Einstellungen</a> ein- und ausschalten.</p>
     </section>
   </div>
 </div>
