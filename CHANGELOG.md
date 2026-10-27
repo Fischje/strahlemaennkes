@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.15 – 27.10.2026
+
+- Neu unter „Funktionen“ (nur Admin): Anwesenheitsstatistik. Zeigt je Jahr und gesamt, wer wie oft beim Stammtisch war, mit Quote und letztem Besuch.
+
 ## Beta 0.7.14 – 27.10.2026
 
 - Protokolle: Abgeschlossene Stammtisch-Protokolle gibt es jetzt als PDF („Als PDF“) inklusive Anwesenheit, Bildern und Aufgaben. „Per WhatsApp teilen“ schickt das PDF direkt über das Teilen-Menü des Handys; wo das nicht geht, wird ein WhatsApp-Text mit Link zum Protokoll geöffnet.

@@ -12,6 +12,7 @@ if(has_role('admin') || sektbar_is_enabled($pdo)) {
 if(can_manage_spiess_delegation()) $items[]=['/spiess-vertretung.php','bi-person-badge','Spieß-Vertretung','Vertretung einsetzen oder wieder beenden.'];
 if(can_manage_assembly()) $items[]=['/antreten.php','bi-clock','Antreten festlegen','Nächsten Termin, Treffpunkt und Kleidung festlegen.'];
 if(can_edit_chronicle()) $items[]=['/chronik-admin.php','bi-pencil-square','Chronik verwalten','Einträge der Zug-Chronik bearbeiten und veröffentlichen.'];
+if(can_view_stats($pdo,$u)) $items[]=['/statistik.php','bi-bar-chart','Anwesenheitsstatistik','Wer war wie oft beim Stammtisch?'];
 if(has_role('admin')) $items[]=['/admin-features.php','bi-toggles','Freischaltungen','Registrierung und optionale Funktionen zentral freischalten.'];
 
 $pageTitle='Funktionen';

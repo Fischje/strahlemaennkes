@@ -105,6 +105,8 @@ function can_manage_protocols(): bool { return has_role('admin','spiess') || is_
 function can_create_meetings(PDO $pdo, ?array $user=null): bool { return can_act_as_spiess($pdo,$user) || is_treasurer() || is_leader(); }
 function can_manage_meetings(PDO $pdo, ?array $user=null): bool { return can_create_meetings($pdo,$user) || is_secretary(); }
 function can_run_protocol(PDO $pdo, ?array $user=null): bool { return is_leader() || is_secretary() || can_act_as_spiess($pdo,$user); }
+/** Wer die Anwesenheitsstatistik sehen darf (aktuell nur Admin; später ggf. alle Mitglieder). */
+function can_view_stats(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
 function can_reopen_protocols(): bool { return has_role('admin') || is_secretary(); }
 function can_edit_chronicle(): bool { return has_role('spiess','admin') || is_leader(); }
 function can_manage_assembly(): bool { return has_role('admin') || is_leader(); }
