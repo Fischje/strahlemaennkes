@@ -107,6 +107,9 @@ function can_manage_meetings(PDO $pdo, ?array $user=null): bool { return can_cre
 function can_run_protocol(PDO $pdo, ?array $user=null): bool { return is_leader() || is_secretary() || can_act_as_spiess($pdo,$user); }
 /** Wer die Anwesenheitsstatistik sehen darf (aktuell nur Admin; später ggf. alle Mitglieder). */
 function can_view_stats(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
+/** Kirmes-Planung: vorerst nur Admin (Ansicht und Bearbeitung getrennt, damit später die Ansicht geöffnet werden kann). */
+function can_view_kirmes(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
+function can_edit_kirmes(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
 function can_reopen_protocols(): bool { return has_role('admin') || is_secretary(); }
 function can_edit_chronicle(): bool { return has_role('spiess','admin') || is_leader(); }
 function can_manage_assembly(): bool { return has_role('admin') || is_leader(); }

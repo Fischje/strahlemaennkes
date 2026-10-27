@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.16 – 27.10.2026
+
+- Neu unter „Funktionen“ (vorerst nur Admin): Kirmes-Planung. Je Tag Antreten (Uhrzeit, Treffpunkt), Kleidung und Mitbringsel; vergangene Tage klappen weg.
+
 ## Beta 0.7.15 – 27.10.2026
 
 - Neu unter „Funktionen“ (nur Admin): Anwesenheitsstatistik. Zeigt je Jahr und gesamt, wer wie oft beim Stammtisch war, mit Quote und letztem Besuch.
