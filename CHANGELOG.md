@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.12 – 27.10.2026
+
+- Neu: „Einstellungen“ im Benutzermenü oben rechts. Dort wählt jedes Mitglied, welche Push-Benachrichtigungen es bekommt (Stammtisch, Neuigkeiten, Sektbar, Getränke, Runden), und kann Push für das Gerät aktivieren.
+- Behoben: Die roten/gelben Hinweiszeilen (Stammtisch, Antreten, Sektbar) lagen über dem Benutzermenü und verdeckten es.
+
 ## Beta 0.7.11 – 22.10.2026
 
 - Der Schalter für die Selbstregistrierung ist von „Mitglieder“ nach „Funktionen“ → „Freischaltungen“ umgezogen.

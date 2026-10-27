@@ -47,6 +47,7 @@ header('Pragma: no-cache');
           </button>
           <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu">
             <li><div class="dropdown-header"><?=e($u['first_name'].' '.$u['last_name'])?></div></li>
+            <li><a class="dropdown-item" href="/settings.php"><i class="bi bi-gear me-2"></i>Einstellungen</a></li>
             <li><a class="dropdown-item" href="/change-password.php"><i class="bi bi-key me-2"></i>Passwort ändern</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Abmelden</a></li>
@@ -81,7 +82,8 @@ header('Pragma: no-cache');
             </button>
             <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu">
               <li><div class="dropdown-header"><?=e($u['first_name'].' '.$u['last_name'])?></div></li>
-              <li><a class="dropdown-item" href="/change-password.php"><i class="bi bi-key me-2"></i>Passwort ändern</a></li>
+              <li><a class="dropdown-item" href="/settings.php"><i class="bi bi-gear me-2"></i>Einstellungen</a></li>
+            <li><a class="dropdown-item" href="/change-password.php"><i class="bi bi-key me-2"></i>Passwort ändern</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Abmelden</a></li>
             </ul>

@@ -19,16 +19,16 @@ foreach($rows as $m){
     $info=$m['title'].' · '.meeting_display($m['starts_at_utc']).' Uhr'.($m['location']?' · '.$m['location']:'');
 
     if(!$m['reminder_week_sent_at'] && $now>=$weekFrom && $now<$weekFrom->modify('+1 day')){
-        send_push_to_all_active_users($pdo,'Stammtisch in einer Woche',$info,'/stammtisch.php','meeting-reminder-week');
+        send_push_to_all_active_users($pdo,'Stammtisch in einer Woche',$info,'/stammtisch.php','meeting-reminder-week','stammtisch');
         $mark((int)$m['id'],'reminder_week_sent_at');echo 'Wochen-Erinnerung '.$m['id'].PHP_EOL;
     }
     if(!$m['reminder_day_sent_at'] && $now>=$dayFrom && $now<$start){
-        send_push_to_all_active_users($pdo,'Heute ist Stammtisch',$info,'/stammtisch.php','meeting-reminder-day');
+        send_push_to_all_active_users($pdo,'Heute ist Stammtisch',$info,'/stammtisch.php','meeting-reminder-day','stammtisch');
         $mark((int)$m['id'],'reminder_day_sent_at');echo 'Tages-Erinnerung '.$m['id'].PHP_EOL;
     }
     $minutes=($start->getTimestamp()-$now->getTimestamp())/60;
     if(!$m['reminder_sent_at'] && $minutes>=55 && $minutes<=65){
-        send_push_to_all_active_users($pdo,'Stammtisch in einer Stunde',$info,'/stammtisch.php','meeting-reminder');
+        send_push_to_all_active_users($pdo,'Stammtisch in einer Stunde',$info,'/stammtisch.php','meeting-reminder','stammtisch');
         $mark((int)$m['id'],'reminder_sent_at');echo 'Erinnerung '.$m['id'].PHP_EOL;
     }
 }

@@ -1,5 +1,23 @@
 <?php
 
+/** Kategorien für persönliche Push-Einstellungen (Schlüssel => [Titel, Beschreibung]). */
+function push_categories(): array
+{
+    return [
+        'stammtisch' => ['Stammtisch', 'Neue Terminfindung, festgelegter Termin, Absage und Erinnerungen.'],
+        'news'       => ['Neuigkeiten', 'Neue Beiträge in der App.'],
+        'sektbar'    => ['Sektbar', 'Wenn der Sektbarmodus startet.'],
+        'getraenke'  => ['Getränke', 'Erinnerung zur Getränkewahl und Hinweise zu Getränkewechseln.'],
+        'runden'     => ['Runden', 'Wenn du eine Runde holen sollst oder eine Runde als gegeben markiert wurde.'],
+    ];
+}
+
+/** SQL-Zusatz: schließt Mitglieder aus, die die Kategorie abgeschaltet haben. */
+function push_category_filter(string $category): string
+{
+    return $category === '' ? '' : " AND NOT EXISTS(SELECT 1 FROM user_push_prefs pp WHERE pp.user_id=u.id AND pp.category=? AND pp.enabled=0)";
+}
+
 /**
  * Sendet die Getränkeerinnerung per Web Push.
  *
@@ -13,7 +31,7 @@
  *   error => ?string
  * ]
  */
-function send_drink_reminder_pushes(PDO $pdo, string $target, string $message): array
+function send_drink_reminder_pushes(PDO $pdo, string $target, string $message, string $category='getraenke'): array
 {
     $result = [
         'configured' => false,
@@ -61,7 +79,10 @@ function send_drink_reminder_pushes(PDO $pdo, string $target, string $message): 
         $sql .= " AND (p.user_id IS NULL OR p.drink_id IS NULL)";
     }
 
-    $subscriptions = $pdo->query($sql)->fetchAll();
+    $sql .= push_category_filter($category);
+    $st = $pdo->prepare($sql);
+    $st->execute($category === '' ? [] : [$category]);
+    $subscriptions = $st->fetchAll();
     if (!$subscriptions) {
         return $result;
     }
@@ -125,7 +146,7 @@ function send_drink_reminder_pushes(PDO $pdo, string $target, string $message): 
 /**
  * Sendet eine einzelne Push-Nachricht an alle registrierten Geräte eines Mitglieds.
  */
-function send_push_to_user(PDO $pdo, int $userId, string $title, string $message, string $url='/member-drink.php', string $tag='strahlemaennkes'): array
+function send_push_to_user(PDO $pdo, int $userId, string $title, string $message, string $url='/member-drink.php', string $tag='strahlemaennkes', string $category=''): array
 {
     $result = [
         'configured' => false,
@@ -165,9 +186,9 @@ function send_push_to_user(PDO $pdo, int $userId, string $title, string $message
         SELECT s.endpoint,s.p256dh,s.auth_token
         FROM push_subscriptions s
         JOIN users u ON u.id=s.user_id
-        WHERE s.user_id=? AND u.is_active=1
+        WHERE s.user_id=? AND u.is_active=1".push_category_filter($category)."
     ");
-    $st->execute([$userId]);
+    $st->execute($category === '' ? [$userId] : [$userId,$category]);
     $subscriptions = $st->fetchAll();
     if (!$subscriptions) return $result;
 
@@ -226,7 +247,7 @@ function send_push_to_user(PDO $pdo, int $userId, string $title, string $message
 /**
  * Sendet eine Push-Nachricht an alle registrierten Geräte aktiver Mitglieder.
  */
-function send_push_to_all_active_users(PDO $pdo, string $title, string $message, string $url='/dashboard.php', string $tag='strahlemaennkes'): array
+function send_push_to_all_active_users(PDO $pdo, string $title, string $message, string $url='/dashboard.php', string $tag='strahlemaennkes', string $category=''): array
 {
     $result = [
         'configured' => false,
@@ -262,13 +283,15 @@ function send_push_to_all_active_users(PDO $pdo, string $title, string $message,
 
     $result['configured'] = true;
 
-    $subscriptions = $pdo->query("
+    $st = $pdo->prepare("
         SELECT s.endpoint,s.p256dh,s.auth_token
         FROM push_subscriptions s
         JOIN users u ON u.id=s.user_id
-        WHERE u.is_active=1
+        WHERE u.is_active=1".push_category_filter($category)."
         ORDER BY s.id
-    ")->fetchAll();
+    ");
+    $st->execute($category === '' ? [] : [$category]);
+    $subscriptions = $st->fetchAll();
 
     if (!$subscriptions) return $result;
 

@@ -129,7 +129,7 @@ function notify_active_spiess_drink_change(PDO $pdo, array $member, string $drin
     require_once __DIR__.'/push.php';
     foreach(active_spiess_push_user_ids($pdo) as $uid){
         if($uid===(int)$member['id']) continue;
-        send_push_to_user($pdo,$uid,'Getränk geändert',$member['first_name'].' '.$member['last_name'].': '.$drinkName,'/theke.php','drink-change');
+        send_push_to_user($pdo,$uid,'Getränk geändert',$member['first_name'].' '.$member['last_name'].': '.$drinkName,'/theke.php','drink-change','getraenke');
     }
 }
 function german_weekday_short(DateTimeInterface $d): string {

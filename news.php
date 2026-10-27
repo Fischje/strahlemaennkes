@@ -31,7 +31,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 $pdo,
                 'Strahlemännkes · Neuigkeit',
                 $pushText,
-                '/news.php#news-'.$postId
+                '/news.php#news-'.$postId,
+                'strahlemaennkes',
+                'news'
             );
 
             if(!$pushResult['configured']){

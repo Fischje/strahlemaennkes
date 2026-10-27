@@ -17,7 +17,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
    $pdo->prepare("UPDATE sektbar_state SET is_active=1,activated_at=CURRENT_TIMESTAMP,activated_by=? WHERE id=1")->execute([(int)$u['id']]);
    $pdo->commit();
    require_once __DIR__.'/includes/push.php';
-   $push=send_push_to_all_active_users($pdo,'Sektbarmodus aktiviert 🥂','Die Sektbar ist jetzt geöffnet. Schau in die App für die aktuelle Getränkeauswahl.','/sektbar.php');
+   $push=send_push_to_all_active_users($pdo,'Sektbarmodus aktiviert 🥂','Die Sektbar ist jetzt geöffnet. Schau in die App für die aktuelle Getränkeauswahl.','/sektbar.php','strahlemaennkes','sektbar');
    flash('success','Sektbarmodus aktiviert.'.($push['sent']>0?' Push an '.$push['sent'].' Gerät(e) zugestellt.':''));
   }catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();throw $e;}
  }

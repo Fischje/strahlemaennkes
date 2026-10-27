@@ -79,7 +79,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             (int)$round['user_id'],
             'Strahlemännkes 🍻 – Du bist dran!',
             'Der Spieß schickt dich eine Runde holen. Öffne die App für die aktuelle Live-Bestellung.',
-            '/round-order.php'
+            '/round-order.php',
+            'strahlemaennkes',
+            'runden'
         );
 
         if($push['sent']>0){
@@ -119,7 +121,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             WHERE id=?
         ")->execute([$id]);
 
-        $givenPush=send_push_to_user($pdo,(int)$round['user_id'],'Runde gegeben 🍻','Deine Runde „'.(string)$round['reason'].'“ wurde vom Spieß als gegeben markiert.','/fines.php','round-settled');
+        $givenPush=send_push_to_user($pdo,(int)$round['user_id'],'Runde gegeben 🍻','Deine Runde „'.(string)$round['reason'].'“ wurde vom Spieß als gegeben markiert.','/fines.php','round-settled','runden');
         flash('success','Runde gegeben – dieser Eintrag ist erledigt.'.($givenPush['sent']>0?' Push wurde zugestellt.':''));
         redirect('/fines.php');
     }

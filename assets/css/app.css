@@ -1066,3 +1066,7 @@ button.version-note { font:inherit; cursor:pointer; } button.version-note:hover 
 .modal .btn-close { opacity:.95; padding:.9rem; margin:-.4rem -.4rem -.4rem auto; background-size:1.1rem; }
 .modal .btn-close:hover, .modal .btn-close:focus { opacity:1; }
 @media(max-width:575.98px){ .modal { --bs-modal-margin:1.25rem; } }
+
+/* Beta 0.7.12: Hinweiszeilen (Antreten/Sektbar/Stammtisch) liegen im Seitenfluss unter der Navigation und nicht darüber */
+.app-navbar { z-index:1050; }
+.assembly-topline, .stammtisch-topline, .sektbar-topline { position:relative; z-index:1; }
