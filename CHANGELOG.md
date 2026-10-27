@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.13 – 27.10.2026
+
+- Stammtisch: Aufgaben aus dem Protokoll. Im laufenden Stammtisch lässt sich je Tagesordnungspunkt eine Aufgabe mit Zuständigem und optionaler Frist anlegen. Noch offene Aufgaben früherer Protokolle erscheinen im nächsten Protokoll automatisch zum Abhaken. Im Archiv stehen die Aufgaben beim jeweiligen Punkt.
+
 ## Beta 0.7.12 – 27.10.2026
 
 - Neu: „Einstellungen“ im Benutzermenü oben rechts. Dort wählt jedes Mitglied, welche Push-Benachrichtigungen es bekommt (Stammtisch, Neuigkeiten, Sektbar, Getränke, Runden), und kann Push für das Gerät aktivieren.

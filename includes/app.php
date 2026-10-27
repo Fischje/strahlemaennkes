@@ -442,6 +442,23 @@ function active_meeting(PDO $pdo): ?array {
     $row=$pdo->query("SELECT * FROM meetings WHERE status IN ('poll','scheduled','running') ORDER BY id DESC LIMIT 1")->fetch();
     return $row ?: null;
 }
+const MEETING_TASK_SELECT="SELECT t.id,t.title,t.due_date,t.status,t.agenda_item_id,t.meeting_id,t.done_at,t.done_meeting_id,TRIM(a.first_name||' '||a.last_name) AS assignee,m.title AS meeting_title,m.starts_at_utc AS meeting_starts FROM meeting_tasks t JOIN meetings m ON m.id=t.meeting_id LEFT JOIN users a ON a.id=t.assignee_user_id";
+/** Aufgaben, die in diesem Stammtisch angelegt wurden, gruppiert nach Tagesordnungspunkt. */
+function meeting_tasks_by_item(PDO $pdo, int $meetingId): array {
+    $q=$pdo->prepare(MEETING_TASK_SELECT." WHERE t.meeting_id=? ORDER BY t.id");$q->execute([$meetingId]);$out=[];
+    foreach($q->fetchAll() as $t)$out[(int)$t['agenda_item_id']][]=$t;
+    return $out;
+}
+/** Noch offene Aufgaben aus früheren Stammtischen (erscheinen im laufenden Protokoll zum Abhaken). */
+function meeting_open_tasks_before(PDO $pdo, int $meetingId): array {
+    $q=$pdo->prepare(MEETING_TASK_SELECT." WHERE t.status='open' AND t.meeting_id<>? ORDER BY m.starts_at_utc,t.id");$q->execute([$meetingId]);
+    return $q->fetchAll();
+}
+/** In diesem Stammtisch erledigte Aufgaben aus früheren Protokollen. */
+function meeting_tasks_done_in(PDO $pdo, int $meetingId): array {
+    $q=$pdo->prepare(MEETING_TASK_SELECT." WHERE t.done_meeting_id=? AND t.meeting_id<>? ORDER BY t.done_at,t.id");$q->execute([$meetingId,$meetingId]);
+    return $q->fetchAll();
+}
 function meeting_audit(PDO $pdo, int $meetingId, int $userId, string $event, ?string $details=null): void {
     $pdo->prepare('INSERT INTO meeting_audit(meeting_id,user_id,event,details) VALUES(?,?,?,?)')->execute([$meetingId,$userId,$event,$details]);
 }
