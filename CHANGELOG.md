@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.20 – 27.10.2026
+
+- Seitenrahmen: Auf großen Bildschirmen liegt die App als zentrierte helle Spalte auf sehr dunklem Grau, wie bei Kellerkinder.
+- Hintergrundbild: Hinter der Seite scheint ein Bild zu 15 % durch. Admins tauschen es unter Funktionen → Freischaltungen aus (mindestens 1920×1080, JPG/PNG/WebP). Das Bild wird in der Datenbank gespeichert; es sind keine Ordnerrechte nötig.
+
 ## Beta 0.7.19 – 27.10.2026
 
 - Neues Design „D“: Die App ist jetzt hell und freundlich (Creme-Hintergrund, weiße Karten mit schwarzem Text, Vereinsrot als Akzent, gelbe Stammtisch-Zeile) statt dunkel. Karten, Knöpfe und Eingabefelder haben nur noch minimale Rundungen. Die bisherigen Schriften bleiben. Das Design liegt in der Datei assets/css/theme-d.css und lässt sich dort abschalten.

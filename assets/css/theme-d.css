@@ -20,11 +20,13 @@
   --sm-shadow: 0 1px 1px rgba(14,17,22,.04), 0 22px 44px -28px rgba(14,17,22,.30);
   --sm-glow: 0 10px 28px -10px rgba(181,18,27,.55), 0 6px 34px -8px rgba(255,217,59,.35);
 }
-html, body { background: var(--sm-bg) !important; color: var(--sm-text); }
+html { background:#0B0C0E !important; }
+body { background:transparent !important; color:var(--sm-text); }
+/* Hintergrundbild: liegt fest hinter der Seite und scheint zu 15 % durch (Bild wird im Adminbereich ausgetauscht). */
 body::before {
-  content:""; position:fixed; left:50%; top:-260px; width:980px; height:520px; transform:translateX(-50%);
-  background:radial-gradient(closest-side, rgba(181,18,27,.09), rgba(255,217,59,.08) 55%, transparent 75%);
-  pointer-events:none; z-index:0;
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:var(--sm-bg-image, none); background-size:cover; background-position:center; background-repeat:no-repeat;
+  opacity:.15;
 }
 main, .app-footer { position:relative; z-index:1; }
 .text-secondary { color: var(--sm-muted) !important; }
@@ -196,9 +198,9 @@ a { text-decoration-color:currentColor; }
 .function-card .text-secondary { color:var(--sm-muted) !important; }
 
 /* ---------- Öffentliche Seiten: Startseite und Chronik ebenfalls hell ---------- */
-html:has(body.home-page), body.home-page, body.home-page main, body.home-page .home-minimal {
-  background-color:var(--sm-bg) !important; color:var(--sm-text) !important;
-}
+html:has(body.home-page) { background-color:#0B0C0E !important; }
+body.home-page { background-color:transparent !important; color:var(--sm-text) !important; }
+body.home-page main, body.home-page .home-minimal { background-color:var(--sm-bg) !important; color:var(--sm-text) !important; }
 body.home-page .home-minimal, body.home-page .home-minimal {
   background:radial-gradient(circle at 50% 8%, rgba(181,18,27,.10), rgba(255,217,59,.10) 38%, transparent 62%), var(--sm-bg) !important;
 }
@@ -218,7 +220,24 @@ body.home-page .home-minimal-card .btn-light, body.home-page .home-minimal-card 
 .timeline-row:before { box-shadow:0 0 0 3px rgba(181,18,27,.12); }
 .public-page .panel h2, .public-page .panel p { color:var(--sm-text); }
 body.home-page .home-minimal-card { background-color:transparent !important; }
-.public-page, .public-page main { background:var(--sm-bg) !important; color:var(--sm-text); }
+.public-page { background:transparent !important; color:var(--sm-text); }
+.public-page main { background:var(--sm-bg) !important; color:var(--sm-text); }
 .public-page .panel { background:#fff; }
 .public-page .app-footer, .home-page .app-footer { background:#0B0D12; }
 .badge.rounded-pill, .btn.rounded-pill { border-radius:var(--sm-radius) !important; }
+
+/* ---------- Seitenrahmen: Inhalt als zentrierte helle Spalte auf dunklem Grund (wie bei Kellerkinder) ---------- */
+:root { --sm-shell:1320px; }
+.app-navbar, .stammtisch-topline, .assembly-topline, .sektbar-topline, main, .app-footer {
+  position:relative; z-index:1; width:100%; max-width:var(--sm-shell); margin-left:auto; margin-right:auto;
+}
+.app-navbar { position:sticky; z-index:1030; }
+main { background:var(--sm-bg); }
+.app-navbar { box-shadow:0 1px 1px rgba(14,17,22,.04), 0 18px 40px -26px rgba(14,17,22,.25) !important; }
+/* Schatten der Spalte liegt hinter den Inhalten, damit er die gelbe Zeile nicht abdunkelt */
+body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(100%,var(--sm-shell)); transform:translateX(-50%); box-shadow:0 0 90px rgba(0,0,0,.6); z-index:0; pointer-events:none; }
+/* In der Spalte bleibt seitlich Luft */
+@media (min-width:1400px){
+  .app-navbar > .container, main .container, .app-footer .container { max-width:calc(var(--sm-shell) - 48px); }
+  .app-navbar, main, .app-footer { border-left:1px solid #1A1D22; border-right:1px solid #1A1D22; }
+}

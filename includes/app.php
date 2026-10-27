@@ -263,6 +263,18 @@ function active_round_for_user(PDO $pdo, int $userId): ?array {
     return $st->fetch() ?: null;
 }
 
+/** Zeitstempel des Hintergrundbilds (null, wenn keines hochgeladen ist). Wird für den Cache-Parameter der Bild-URL genutzt. */
+function site_background_stamp(PDO $pdo): ?int {
+    static $loaded=false, $stamp=null;
+    if(!$loaded){
+        $loaded=true;
+        try{
+            $v=$pdo->query('SELECT EXTRACT(EPOCH FROM updated_at)::bigint FROM site_background WHERE id=1')->fetchColumn();
+            $stamp=$v===false ? null : (int)$v;
+        }catch(Throwable $e){ $stamp=null; }
+    }
+    return $stamp;
+}
 function app_version(): array {
     static $version = null;
     if ($version === null) $version = require __DIR__ . '/version.php';
