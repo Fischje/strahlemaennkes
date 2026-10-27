@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.21 – 27.10.2026
+
+- Seitenabstand: Texte und Karten kleben am Handy nicht mehr am linken und rechten Rand, sondern haben etwa 12 px Abstand.
+
 ## Beta 0.7.20 – 27.10.2026
 
 - Seitenrahmen: Auf großen Bildschirmen liegt die App als zentrierte helle Spalte auf sehr dunklem Grau, wie bei Kellerkinder.

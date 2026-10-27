@@ -241,3 +241,7 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
   .app-navbar > .container, main .container, .app-footer .container { max-width:calc(var(--sm-shell) - 48px); }
   .app-navbar, main, .app-footer { border-left:1px solid #1A1D22; border-right:1px solid #1A1D22; }
 }
+
+/* ---------- Seitenabstand: Inhalt klebt nicht mehr am Rand (app.css setzte padding:2rem 0 und nahm dem Container den seitlichen Abstand) ---------- */
+.dashboard-shell { padding-left:calc(var(--bs-gutter-x, 1.5rem) * .5); padding-right:calc(var(--bs-gutter-x, 1.5rem) * .5); }
+@media (max-width:575.98px){ .container { --bs-gutter-x:1.5rem; } }
