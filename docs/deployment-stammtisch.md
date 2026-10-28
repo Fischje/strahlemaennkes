@@ -37,10 +37,21 @@ sudo -u postgres psql -d strahlemaennkes -c "SELECT version, applied_at FROM sch
 
 Erwartet wird `002_stammtisch_protocols.sql`. Diese Migration entfernt `news_posts` und legt alle Stammtisch-/Protokolltabellen an.
 
-4. Eine stündliche Erinnerung braucht diesen Cron-Eintrag (jede Minute ausführen; der Prozess verschickt jede Erinnerung genau einmal: eine Woche vorher und am Tag selbst ab 9 Uhr sowie eine Stunde vorher im 55–65-Minuten-Fenster):
+4. Cron für Erinnerungen und Aufräumen (jede Minute; verschickt jede Erinnerung genau einmal: eine Woche vorher und am Tag selbst ab 9 Uhr sowie eine Stunde vorher, und räumt stündlich abgelaufene Tokens auf). Die Datenbank-Zugangsdaten stehen nur in der php-fpm-Pool-Datei; ein Hilfsskript liest sie als root und startet PHP als `www-data`:
 
-```cron
-* * * * * www-data /usr/bin/php /srv/strahlemaennkes/bin/send-meeting-reminders.php >> /var/log/strahlemaennkes-meeting-reminders.log 2>&1
+```bash
+sudo tee /usr/local/bin/strahlemaennkes-reminders.sh <<'EOF2'
+#!/usr/bin/env bash
+# Startet die Stammtisch-Erinnerungen mit denselben Umgebungsvariablen wie die App (php-fpm-Pool).
+set -euo pipefail
+POOL=$(ls /etc/php/*/fpm/pool.d/strahlemaennkes.conf | head -n1)
+set -a
+eval "$(grep -E '^env\[' "$POOL" | sed -E "s/^env\[([A-Za-z0-9_]+)\][[:space:]]*=[[:space:]]*\"?([^\"]*)\"?[[:space:]]*$/\1='\2'/")"
+set +a
+exec runuser -u www-data -- /usr/bin/php /srv/strahlemaennkes/bin/send-meeting-reminders.php
+EOF2
+sudo chmod 755 /usr/local/bin/strahlemaennkes-reminders.sh
+echo '* * * * * root /usr/local/bin/strahlemaennkes-reminders.sh >> /var/log/strahlemaennkes-meeting-reminders.log 2>&1' | sudo tee /etc/cron.d/strahlemaennkes-reminders
 ```
 
 5. Im Browser prüfen: Startseite, Stammtisch, Protokolle, Upload eines kleinen Testbildes und Zugriff auf ein Test-PDF. Erst anschließend den Testeintrag wieder löschen bzw. den Test-Stammtisch abschließen.

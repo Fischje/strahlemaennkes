@@ -6,7 +6,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
         'httponly' => true,
         'samesite' => 'Lax',
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'secure' => request_is_https(),
     ]);
     session_start();
 }
@@ -131,7 +131,6 @@ function active_spiess_push_user_ids(PDO $pdo): array {
     return array_map('intval',$pdo->query("SELECT id FROM users WHERE is_active=1 AND role='spiess'")->fetchAll(PDO::FETCH_COLUMN));
 }
 function notify_active_spiess_drink_change(PDO $pdo, array $member, string $drinkName): void {
-    require_once __DIR__.'/push.php';
     foreach(active_spiess_push_user_ids($pdo) as $uid){
         if($uid===(int)$member['id']) continue;
         send_push_to_user($pdo,$uid,'Getränk geändert',$member['first_name'].' '.$member['last_name'].': '.$drinkName,'/theke.php','drink-change','getraenke');
@@ -319,9 +318,9 @@ function password_rule_help(): string {
     return password_rule_text().' Erlaubte Sonderzeichen: '.password_allowed_specials();
 }
 
-function login_user(array $user): void {
-    session_regenerate_id(true);
-    $_SESSION['user'] = [
+/** Die Felder des Benutzers, die in der Sitzung gehalten werden. */
+function session_user_from_row(array $user): array {
+    return [
         'id'=>(int)$user['id'],
         'username'=>$user['username'],
         'first_name'=>$user['first_name'],
@@ -332,6 +331,98 @@ function login_user(array $user): void {
         'is_secretary'=>(int)($user['is_secretary'] ?? 0),
         'must_change_password'=>(int)($user['must_change_password'] ?? 0),
     ];
+}
+
+function login_user(array $user): void {
+    session_regenerate_id(true);
+    $_SESSION['user'] = session_user_from_row($user);
+}
+
+/**
+ * Gleicht die Sitzung bei jeder Anfrage mit der Datenbank ab. Ohne diesen Abgleich behielt ein
+ * deaktiviertes Mitglied oder ein Admin, dem die Rolle entzogen wurde, seine Rechte bis zum Abmelden.
+ */
+function refresh_session_user(PDO $pdo): void {
+    $u = current_user();
+    if (!$u) return;
+    $st = $pdo->prepare('SELECT * FROM users WHERE id=?');
+    $st->execute([(int)$u['id']]);
+    $row = $st->fetch();
+    if (!$row || (int)$row['is_active'] !== 1) {
+        clear_remember_login($pdo);
+        $_SESSION = [];
+        session_regenerate_id(true);
+        flash('warning', 'Dein Konto ist nicht mehr aktiv. Bitte wende dich an den Administrator.');
+        return;
+    }
+    $_SESSION['user'] = session_user_from_row($row);
+}
+
+/* ---------- Schutz gegen Passwort-Raten: höchstens LOGIN_MAX_FAILURES Fehlversuche je Login in LOGIN_WINDOW_MINUTES ---------- */
+const LOGIN_MAX_FAILURES = 8;
+const LOGIN_WINDOW_MINUTES = 15;
+function login_key(string $login): string { return mb_strtolower(trim($login), 'UTF-8'); }
+function login_is_throttled(PDO $pdo, string $login): bool {
+    $st = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE login_key=? AND attempted_at > CURRENT_TIMESTAMP - make_interval(mins => ?)");
+    $st->execute([login_key($login), LOGIN_WINDOW_MINUTES]);
+    return (int)$st->fetchColumn() >= LOGIN_MAX_FAILURES;
+}
+function login_record_failure(PDO $pdo, string $login): void {
+    $pdo->prepare('INSERT INTO login_attempts(login_key) VALUES(?)')->execute([mb_substr(login_key($login), 0, 254)]);
+}
+function login_clear_failures(PDO $pdo, string $login): void {
+    $pdo->prepare('DELETE FROM login_attempts WHERE login_key=?')->execute([login_key($login)]);
+}
+
+/** Fehlermeldung für die Oberfläche: eigene Hinweise ja, Datenbank- und Systemfehler nur allgemein (Details ins Log). */
+function user_error_message(Throwable $e): string {
+    if ($e instanceof RuntimeException && !($e instanceof PDOException)) return $e->getMessage();
+    error_log('Strahlemännkes: ' . get_class($e) . ': ' . $e->getMessage());
+    return 'Das hat nicht geklappt. Bitte erneut versuchen oder den Administrator informieren.';
+}
+
+/** Regelmäßige Aufräumarbeiten (stündlich aus dem Cron-Skript): abgelaufene Tokens und alte Fehlversuche löschen. */
+function app_maintenance(PDO $pdo): void {
+    $pdo->exec('DELETE FROM remember_tokens WHERE expires_at <= CURRENT_TIMESTAMP');
+    $pdo->exec('DELETE FROM password_reset_tokens WHERE used_at IS NOT NULL OR expires_at <= CURRENT_TIMESTAMP');
+    $pdo->exec("DELETE FROM login_attempts WHERE attempted_at < CURRENT_TIMESTAMP - INTERVAL '1 day'");
+}
+
+/** Gemeinsame Daten für die Live-Bestellung (Theke und Runde holen). */
+function live_drink_status(PDO $pdo): array {
+    $items=[];
+    $memberRows=$pdo->query("SELECT d.id,d.name,d.emoji,u.first_name || ' ' || substr(u.last_name,1,1) || '.' person, upper(substr(trim(u.first_name),1,1) || substr(trim(u.last_name),1,1)) export_code FROM users u JOIN user_drink_preferences p ON p.user_id=u.id JOIN drinks d ON d.id=p.drink_id WHERE u.is_active=1")->fetchAll();
+    $guestRows=$pdo->query("SELECT d.id,d.name,d.emoji,g.guest_name || ' (Gast)' person, 'G' || g.id export_code FROM guest_drink_orders g JOIN drinks d ON d.id=g.drink_id")->fetchAll();
+    foreach(array_merge($memberRows,$guestRows) as $r){
+        $id=(int)$r['id'];
+        if(!isset($items[$id])) $items[$id]=['id'=>$id,'name'=>$r['name'],'emoji'=>$r['emoji'],'qty'=>0,'members'=>[],'export_codes'=>[]];
+        $items[$id]['qty']++;
+        $items[$id]['members'][]=$r['person'];
+        $items[$id]['export_codes'][]=$r['export_code'];
+    }
+    $rows=array_values($items);
+    usort($rows,fn($a,$b)=>$b['qty']<=>$a['qty'] ?: strcasecmp($a['name'],$b['name']));
+    $total=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
+    $noneMembers=$pdo->query("SELECT u.first_name || ' ' || substr(u.last_name,1,1) || '.' AS name FROM users u LEFT JOIN user_drink_preferences p ON p.user_id=u.id WHERE u.is_active=1 AND p.drink_id IS NULL ORDER BY u.last_name,u.first_name")->fetchAll(PDO::FETCH_COLUMN);
+    $memberChosen=count($memberRows);
+    $guestCount=count($guestRows);
+    return ['updated_at'=>date(DATE_ATOM),'total'=>$total,'chosen'=>$memberChosen+$guestCount,'member_chosen'=>$memberChosen,'guest_count'=>$guestCount,'none'=>max(0,$total-$memberChosen),'none_members'=>$noneMembers,'drinks'=>$rows];
+}
+
+/** Für JSON-Endpunkte: Anfrage muss von der eigenen Seite kommen (zusätzlich zu SameSite-Cookies). */
+function require_same_origin(): void {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $site = $_SERVER['HTTP_SEC_FETCH_SITE'] ?? '';
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $ok = $site === '' || in_array($site, ['same-origin', 'none'], true);
+    if ($ok && $origin !== '' && $host !== '') {
+        $ok = strcasecmp((string)parse_url($origin, PHP_URL_HOST) . (parse_url($origin, PHP_URL_PORT) ? ':' . parse_url($origin, PHP_URL_PORT) : ''), $host) === 0;
+    }
+    if (!$ok) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        exit(json_encode(['ok' => false, 'error' => 'Anfrage nicht erlaubt.'], JSON_UNESCAPED_UNICODE));
+    }
 }
 
 function request_is_https(): bool {
@@ -450,6 +541,8 @@ function meeting_display(?string $utc, string $format='l, d.m.Y · H:i'): string
     }
     catch (Throwable $e) { return ''; }
 }
+/** Zeitpunkt aus der Datenbank (UTC, z. B. CURRENT_TIMESTAMP) in deutscher Ortszeit anzeigen. */
+function local_time(?string $utc, string $format='d.m.Y H:i'): string { return meeting_display($utc, $format); }
 function meeting_local_input(?string $utc): string {
     if (!$utc) return '';
     try { return (new DateTimeImmutable($utc, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Berlin'))->format('Y-m-d\\TH:i'); }
@@ -497,3 +590,4 @@ function send_password_reset_mail(string $email, string $name, string $resetUrl)
 }
 
 restore_remember_login($pdo);
+refresh_session_user($pdo);

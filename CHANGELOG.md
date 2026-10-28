@@ -1,5 +1,14 @@
 # Changelog
 
+## Beta 0.7.25 – 28.10.2026
+
+- Sicherheit verbessert: Anmeldung, Sitzungen und Schnittstellen sind besser geschützt. Änderungen an Rollen und das Deaktivieren eines Mitglieds wirken jetzt sofort.
+- Behoben: Uhrzeiten wie „Runde geschickt seit …“, Spieß-Vertretung, „Zuletzt bearbeitet“ und erledigte Aufgaben wurden 1–2 Stunden zu früh angezeigt.
+- Behoben: Login und „Passwort vergessen“ unterscheiden nicht mehr zwischen Groß- und Kleinschreibung bei Benutzername und E-Mail; der Reset-Link ist wie angekündigt genau 60 Minuten gültig.
+- Fehlermeldungen zeigen keine technischen Interna mehr.
+- Aufgeräumt: nicht mehr genutzte Dateien entfernt (alte Neuigkeiten-Seite, SQLite- und MySQL-Reste), doppelter Code zusammengefasst, Push-Einstellung „Neuigkeiten“ entfernt.
+- Datenbank aufgeräumt: abgelaufene Anmelde- und Reset-Links, Anmeldedaten deaktivierter Mitglieder und verwaiste Einträge entfernt; abgelaufene Daten werden künftig stündlich gelöscht.
+
 ## Beta 0.7.24 – 27.10.2026
 
 - Getränke: Die Stern-Kreise für Favoriten waren noch schwarz und sind jetzt hell (Favorit: gelb). Auch Mitgliederkarten und der Texteditor hatten noch dunkle Flächen und sind angepasst.

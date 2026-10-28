@@ -372,8 +372,8 @@ require __DIR__.'/includes/header.php';
             <td><?=e(date('d.m.Y',strtotime($r['occurred_at'])))?></td>
             <td>
               <span class="badge text-bg-<?=$status[0]?>"><?=$status[1]?></span>
-              <?php if($isDispatched): ?><div class="small text-secondary mt-1">seit <?=e(date('H:i',strtotime($r['dispatched_at'])))?> Uhr</div><?php endif;?>
-              <?php if($r['status']==='paid' && $r['settled_at']): ?><div class="small text-secondary mt-1"><?=e(date('d.m.Y H:i',strtotime($r['settled_at'])))?></div><?php endif;?>
+              <?php if($isDispatched): ?><div class="small text-secondary mt-1">seit <?=e(local_time($r['dispatched_at'],'H:i'))?> Uhr</div><?php endif;?>
+              <?php if($r['status']==='paid' && $r['settled_at']): ?><div class="small text-secondary mt-1"><?=e(local_time($r['settled_at'],'d.m.Y H:i'))?></div><?php endif;?>
             </td>
             <?php if($canManage): ?><td class="text-end"><div class="d-inline-flex flex-wrap gap-1">
               <?php if($r['status']==='open' && !$isDispatched): ?>

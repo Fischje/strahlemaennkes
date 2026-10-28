@@ -28,7 +28,7 @@ $taskLine=function(array $t): string{
     $line=($t['status']==='done'?'[x] ':'[ ] ').$t['title'];
     $line.=' - '.($t['assignee']?'Zuständig: '.$t['assignee']:'Zuständig: offen');
     if($t['due_date']) $line.=' - Frist: '.date('d.m.Y',strtotime($t['due_date']));
-    if($t['status']==='done'&&$t['done_at']) $line.=' - erledigt am '.date('d.m.Y',strtotime($t['done_at']));
+    if($t['status']==='done'&&$t['done_at']) $line.=' - erledigt am '.local_time($t['done_at'],'d.m.Y');
     return $line;
 };
 

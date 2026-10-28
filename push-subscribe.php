@@ -3,6 +3,7 @@ require_once __DIR__.'/includes/app.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
+require_same_origin();
 
 try {
     $u = require_login();
@@ -59,6 +60,6 @@ SQL;
     http_response_code(500);
     echo json_encode([
         'ok' => false,
-        'error' => 'Serverfehler beim Speichern des Push-Abos: ' . $e->getMessage(),
+        'error' => 'Serverfehler beim Speichern des Push-Abos.',
     ], JSON_UNESCAPED_UNICODE);
 }

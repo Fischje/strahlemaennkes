@@ -107,7 +107,7 @@ require __DIR__.'/includes/header.php';
               <div class="small text-secondary">Aktuelle Vertretung</div>
               <div class="h4 fw-bold mb-1"><?=e($active['representative_first'].' '.$active['representative_last'])?></div>
               <div class="small text-secondary">
-                Seit <?=e(date('d.m.Y H:i',strtotime($active['started_at'])))?> Uhr · eingesetzt von <?=e($active['assigned_first'].' '.$active['assigned_last'])?>
+                Seit <?=e(local_time($active['started_at'],'d.m.Y H:i'))?> Uhr · eingesetzt von <?=e($active['assigned_first'].' '.$active['assigned_last'])?>
               </div>
             </div>
             <form method="post" onsubmit="return confirm('Spieß-Vertretung jetzt beenden?');">
@@ -161,8 +161,8 @@ require __DIR__.'/includes/header.php';
               <?php foreach($history as $row): ?>
                 <tr>
                   <td><strong><?=e($row['representative_first'].' '.$row['representative_last'])?></strong></td>
-                  <td><?=e(date('d.m.Y H:i',strtotime($row['started_at'])))?></td>
-                  <td><?= $row['ended_at'] ? e(date('d.m.Y H:i',strtotime($row['ended_at']))) : '<span class="badge text-bg-success">aktiv</span>' ?></td>
+                  <td><?=e(local_time($row['started_at'],'d.m.Y H:i'))?></td>
+                  <td><?= $row['ended_at'] ? e(local_time($row['ended_at'],'d.m.Y H:i')) : '<span class="badge text-bg-success">aktiv</span>' ?></td>
                   <td><?=e($row['assigned_first'].' '.$row['assigned_last'])?></td>
                 </tr>
               <?php endforeach;?>

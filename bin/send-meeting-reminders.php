@@ -1,10 +1,14 @@
 <?php
-// Per Cron minütlich ausführen. Verschickt pro Stammtisch genau einmal je Erinnerung:
+// Per Cron minütlich ausführen. Räumt stündlich auf und verschickt pro Stammtisch genau einmal je Erinnerung:
 //  - eine Woche vorher (ab 09:00 Uhr am Tag, der sieben Tage vor dem Stammtisch liegt),
 //  - am Tag des Stammtischs (ab 09:00 Uhr),
 //  - eine Stunde vorher (Zeitfenster 55 bis 65 Minuten vor Beginn).
 // Ein Stammtisch, der erst kurzfristig festgelegt wird, löst die zu spät liegenden Erinnerungen nicht nachträglich aus.
+if(PHP_SAPI!=='cli'){ http_response_code(404); exit; } // nur per Cron/Kommandozeile
 require_once __DIR__.'/../includes/app.php';
+
+// Einmal pro Stunde: abgelaufene Tokens und alte Fehlversuche aufräumen.
+if((int)date('i')===17){ try{ app_maintenance($pdo); }catch(Throwable $e){ echo 'Wartung fehlgeschlagen: '.$e->getMessage().PHP_EOL; } }
 
 $tz=new DateTimeZone('Europe/Berlin');
 $now=new DateTimeImmutable('now',$tz);

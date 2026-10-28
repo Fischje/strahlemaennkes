@@ -94,7 +94,7 @@ require __DIR__.'/includes/header.php';
         <div class="small text-secondary">Monatlicher Mitgliedsbeitrag</div>
         <div class="cash-fee my-2"><?=number_format((float)$settings['monthly_fee'],2,',','.')?> €</div>
         <div class="small text-secondary">pro Mitglied / Monat</div>
-        <?php if(!empty($settings['updated_at'])):?><div class="small text-secondary mt-3">Zuletzt geändert am <?=e(date('d.m.Y',strtotime($settings['updated_at'])))?><?php if($settings['first_name']):?> von <?=e($settings['first_name'].' '.$settings['last_name'])?><?php endif;?></div><?php endif;?>
+        <?php if(!empty($settings['updated_at'])):?><div class="small text-secondary mt-3">Zuletzt geändert am <?=e(local_time($settings['updated_at'],'d.m.Y'))?><?php if($settings['first_name']):?> von <?=e($settings['first_name'].' '.$settings['last_name'])?><?php endif;?></div><?php endif;?>
         <?php if($canEdit): ?><button class="btn btn-outline-secondary mt-4" data-bs-toggle="modal" data-bs-target="#feeModal"><i class="bi bi-pencil me-1"></i>Beitrag ändern</button><?php endif;?>
       </div>
     </div>

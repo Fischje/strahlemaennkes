@@ -6,10 +6,15 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   $login=trim($_POST['login']??'');
   $password=$_POST['password']??'';
   $remember = !empty($_POST['remember']);
-  $stmt=$pdo->prepare('SELECT * FROM users WHERE (username=? OR email=?) AND is_active=1 LIMIT 1');
+  if($login!=='' && login_is_throttled($pdo,$login)){
+    flash('danger','Zu viele Fehlversuche. Bitte in '.LOGIN_WINDOW_MINUTES.' Minuten erneut versuchen oder das Passwort zurücksetzen.');
+    redirect('/login.php');
+  }
+  $stmt=$pdo->prepare('SELECT * FROM users WHERE (LOWER(username)=LOWER(?) OR LOWER(email)=LOWER(?)) AND is_active=1 LIMIT 1');
   $stmt->execute([$login,$login]);
   $user=$stmt->fetch();
   if($user && password_verify($password,$user['password_hash'])){
+    login_clear_failures($pdo,$login);
     login_user($user);
 
     if(!empty($user['must_change_password'])){
@@ -23,6 +28,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     else clear_remember_login($pdo);
     redirect('/dashboard.php');
   }
+  if($login!=='') login_record_failure($pdo,$login);
   flash('danger','Benutzername/E-Mail oder Passwort ist falsch.'); redirect('/login.php');
 }
 $pageTitle='Login'; require __DIR__.'/includes/header.php';

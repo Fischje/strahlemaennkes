@@ -17,6 +17,12 @@ try {
     require_once __DIR__ . '/migrate.php';
     run_migrations($pdo, __DIR__ . '/../migrations');
 } catch (Throwable $e) {
-    http_response_code(500);
-    exit('PostgreSQL-Datenbank konnte nicht geöffnet oder aktualisiert werden: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
+    // Details nur ins Log bzw. auf die Kommandozeile – im Browser keine Server-Interna zeigen.
+    error_log('Strahlemännkes: PostgreSQL-Fehler: ' . $e->getMessage());
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDERR, 'PostgreSQL-Datenbank konnte nicht geöffnet oder aktualisiert werden: ' . $e->getMessage() . PHP_EOL);
+        exit(1);
+    }
+    http_response_code(503);
+    exit('Die App ist gerade nicht erreichbar (Datenbank). Bitte in ein paar Minuten erneut versuchen.');
 }

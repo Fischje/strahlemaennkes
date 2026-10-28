@@ -3,6 +3,7 @@ require_once __DIR__.'/includes/app.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
+require_same_origin();
 
 try {
     $u = require_login();
@@ -24,6 +25,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'ok'=>false,
-        'error'=>'Push-Abo konnte serverseitig nicht entfernt werden: '.$e->getMessage(),
+        'error'=>'Push-Abo konnte serverseitig nicht entfernt werden.',
     ], JSON_UNESCAPED_UNICODE);
 }

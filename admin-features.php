@@ -35,7 +35,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
    $st->bindValue(1,'image/jpeg');$st->bindValue(2,$stream,PDO::PARAM_LOB);$st->bindValue(3,$w,PDO::PARAM_INT);$st->bindValue(4,$h,PDO::PARAM_INT);$st->bindValue(5,(int)$u['id'],PDO::PARAM_INT);
    $st->execute();
    flash('success','Hintergrundbild gespeichert ('.$w.'×'.$h.').');
-  }catch(Throwable $e){ flash('danger',$e->getMessage()); }
+  }catch(Throwable $e){ flash('danger',user_error_message($e)); }
   redirect('/admin-features.php');
  }
  if(($_POST['action']??'')==='toggle_registration'){

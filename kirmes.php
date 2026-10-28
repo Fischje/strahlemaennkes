@@ -34,7 +34,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $pdo->prepare('DELETE FROM kirmes_days WHERE id=?')->execute([(int)($_POST['id']??0)]);
             flash('success','Tag gelöscht.');
         }
-    }catch(Throwable $e){ flash('danger',$e->getMessage()); }
+    }catch(Throwable $e){ flash('danger',user_error_message($e)); }
     redirect('/kirmes.php');
 }
 

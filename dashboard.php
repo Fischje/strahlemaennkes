@@ -71,7 +71,7 @@ require __DIR__.'/includes/header.php';
       <?php elseif($delegation && can_manage_spiess_delegation()): ?>
         <div class="panel p-3 mb-4 spiess-delegation-notice">
           <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div><strong>Spieß-Vertretung aktiv: <?=e($delegation['representative_first'].' '.$delegation['representative_last'])?></strong><div class="small text-secondary">Seit <?=e(date('d.m.Y H:i',strtotime($delegation['started_at'])))?> Uhr.</div></div>
+            <div><strong>Spieß-Vertretung aktiv: <?=e($delegation['representative_first'].' '.$delegation['representative_last'])?></strong><div class="small text-secondary">Seit <?=e(local_time($delegation['started_at'],'d.m.Y H:i'))?> Uhr.</div></div>
             <a class="btn btn-sm btn-outline-secondary" href="/spiess-vertretung.php">Vertretung verwalten</a>
           </div>
         </div>
