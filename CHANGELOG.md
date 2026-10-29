@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.35 – 29.10.2026
+
+- Antreten: Dieselben Beispiele bei Ort und Kleidung wie im Kalender.
+
 ## Beta 0.7.34 – 29.10.2026
 
 - Hintergrundbild: Die Mindestgröße (Full-HD) entfällt, jedes Bild kann hochgeladen werden.
