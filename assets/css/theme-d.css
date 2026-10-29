@@ -29,7 +29,7 @@ body { background:transparent !important; color:var(--sm-text); }
 /* Hintergrundbild: liegt fest hinter der Seite und scheint zu 15 % durch (Bild wird im Adminbereich ausgetauscht). */
 body::before {
   content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background-image:var(--sm-bg-image, none); background-size:cover; background-position:center; background-repeat:no-repeat;
+  background-image:var(--sm-bg-image, none); background-size:100% auto; background-position:center; background-repeat:no-repeat; /* immer volle Bildschirmbreite */
   opacity:.15;
 }
 main, .app-footer { position:relative; z-index:1; }

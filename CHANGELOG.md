@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.34 – 29.10.2026
+
+- Hintergrundbild: Die Mindestgröße (Full-HD) entfällt, jedes Bild kann hochgeladen werden.
+- Das Hintergrundbild wird jetzt immer auf die volle Bildschirmbreite skaliert, statt am Rand abgeschnitten zu werden.
+
 ## Beta 0.7.33 – 29.10.2026
 
 - Kalender: Passendere Beispiele in den Feldern Ort, „Was anziehen?“ und „Was mitbringen?“.
