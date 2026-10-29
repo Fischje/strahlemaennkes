@@ -46,7 +46,7 @@ Interne, mobile Web-App (PWA) für den Schützenzug **„Strahlemännkes“**: G
 - Die Sitzung wird bei jedem Aufruf mit der Datenbank abgeglichen: Deaktivierte Mitglieder sind sofort abgemeldet, geänderte Rollen gelten sofort.
 - „Eingeloggt bleiben“: zufälliges, gehasht gespeichertes Token, 180 Tage gleitend; Passwortwechsel, Reset und Deaktivierung entfernen es.
 - Alle Formulare mit CSRF-Token, SQL ausschließlich mit Platzhaltern, Protokoll-HTML wird serverseitig bereinigt.
-- Protokollbilder und PDFs liegen außerhalb des Webroots und werden nur an eingeloggte Mitglieder ausgeliefert. Das Hintergrundbild liegt in der Datenbank.
+- Protokollbilder und PDFs liegen außerhalb des Webroots und werden nur an eingeloggte Mitglieder ausgeliefert. Hintergrund-Muster und Gruppenfoto liegen in der Datenbank.
 
 ## Versionierung
 
