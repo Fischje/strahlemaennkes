@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.32 – 29.10.2026
+
+- Kalender: Termine haben jetzt zusätzlich die Felder „Was anziehen?“ und „Was mitbringen?“. Sie stehen in den Details, in der Terminliste und im Handy-Kalender-Abo.
+- Beim Antreten steht die Kleidung jetzt unter „Was anziehen?“; „Was mitbringen?“ und die Bemerkung lassen sich im Kalender ergänzen.
+- Die Kirmes-Planung entfällt – das geht jetzt direkt im Kalender. Bereits geplante Kirmes-Tage wurden als Kalendertermine übernommen.
+
 ## Beta 0.7.31 – 29.10.2026
 
 - Behoben: Die Hinweisleisten für Stammtisch, Antreten und Sektbar erschienen auch auf der Startseite und der öffentlichen Chronik, wenn man angemeldet war. Sie stehen jetzt nur noch im internen Bereich.

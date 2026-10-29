@@ -22,14 +22,14 @@ function can_edit_calendar(PDO $pdo, ?array $user=null): bool {
 
 /** Alle Kalendereinträge (eigene Termine + festgelegte Stammtische) als eine Abfrage. */
 const CALENDAR_UNION_SQL = <<<'SQL'
-SELECT 'event' AS kind, e.id, e.title, e.category, e.event_date, e.start_time, e.end_time, e.location, e.note, e.source,
+SELECT 'event' AS kind, e.id, e.title, e.category, e.event_date, e.start_time, e.end_time, e.location, e.note, e.attire, e.bring, e.source,
        TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')) AS author, NULL::varchar AS status, e.updated_at AS changed_at
 FROM calendar_events e LEFT JOIN users c ON c.id=e.created_by
 UNION ALL
 SELECT 'meeting', m.id, m.title, 'zugtreffen',
        ((m.starts_at_utc AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Berlin')::date,
        ((m.starts_at_utc AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Berlin')::time,
-       NULL::time, m.location, m.note, 'meeting',
+       NULL::time, m.location, m.note, '', '', 'meeting',
        TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')), m.status, m.updated_at
 FROM meetings m LEFT JOIN users c ON c.id=m.created_by
 WHERE m.status IN ('scheduled','running','completed') AND m.starts_at_utc IS NOT NULL
@@ -78,6 +78,8 @@ function calendar_normalize(array $r): array {
         'timeLabel' => $start === '' ? 'ganztägig' : ($end !== '' ? $start . '–' . $end . ' Uhr' : $start . ' Uhr'),
         'location' => (string)$r['location'],
         'note' => (string)$r['note'],
+        'attire' => (string)$r['attire'],
+        'bring' => (string)$r['bring'],
         'source' => (string)$r['source'],
         'author' => trim((string)$r['author']) !== '' ? trim((string)$r['author']) : 'unbekannt',
         'link' => $link,
@@ -103,7 +105,6 @@ function calendar_month_name(int $month): string {
 function calendar_sync_assembly(PDO $pdo, ?array $previous, DateTimeImmutable $local, string $location, string $attire, int $userId): int {
     $date = $local->format('Y-m-d');
     $time = $local->format('H:i');
-    $note = $attire !== '' ? 'Anzug: ' . $attire : '';
     $eventId = (int)($previous['calendar_event_id'] ?? 0);
     $stillCurrent = false;
     if ($eventId > 0 && $previous) {
@@ -113,12 +114,12 @@ function calendar_sync_assembly(PDO $pdo, ?array $previous, DateTimeImmutable $l
         } catch (Throwable $e) { $stillCurrent = false; }
     }
     if ($stillCurrent) {
-        $q = $pdo->prepare("UPDATE calendar_events SET event_date=?,start_time=?,location=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND source='assembly'");
-        $q->execute([$date, $time, $location, $note, $userId, $eventId]);
+        $q = $pdo->prepare("UPDATE calendar_events SET event_date=?,start_time=?,location=?,attire=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND source='assembly'");
+        $q->execute([$date, $time, $location, $attire, $userId, $eventId]);
         if ($q->rowCount() > 0) return $eventId;
     }
-    $q = $pdo->prepare("INSERT INTO calendar_events(title,category,event_date,start_time,location,note,source,created_by,updated_by) VALUES('Antreten','kirmes',?,?,?,?,'assembly',?,?) RETURNING id");
-    $q->execute([$date, $time, $location, $note, $userId, $userId]);
+    $q = $pdo->prepare("INSERT INTO calendar_events(title,category,event_date,start_time,location,attire,source,created_by,updated_by) VALUES('Antreten','kirmes',?,?,?,?,'assembly',?,?) RETURNING id");
+    $q->execute([$date, $time, $location, $attire, $userId, $userId]);
     return (int)$q->fetchColumn();
 }
 
@@ -221,7 +222,9 @@ function calendar_ics(PDO $pdo): string {
         $lines[] = 'SUMMARY:' . ics_text($x['title']);
         if ($x['location'] !== '') $lines[] = 'LOCATION:' . ics_text($x['location']);
         $desc = [];
-        if ($x['note'] !== '') $desc[] = $x['note'];
+        if ($x['attire'] !== '') $desc[] = 'Was anziehen: ' . $x['attire'];
+        if ($x['bring'] !== '') $desc[] = 'Was mitbringen: ' . $x['bring'];
+        if ($x['note'] !== '') $desc[] = 'Bemerkung: ' . $x['note'];
         $desc[] = 'Kategorie: ' . CALENDAR_CATEGORIES[$x['category']]['label'];
         $desc[] = 'Eingetragen von ' . $x['author'];
         $desc[] = 'Änderungen nur über ' . $calendarUrl;

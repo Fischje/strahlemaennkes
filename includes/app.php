@@ -108,8 +108,6 @@ function can_run_protocol(PDO $pdo, ?array $user=null): bool { return is_leader(
 /** Wer die Anwesenheitsstatistik sehen darf (aktuell nur Admin; später ggf. alle Mitglieder). */
 function can_view_stats(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
 /** Kirmes-Planung: vorerst nur Admin (Ansicht und Bearbeitung getrennt, damit später die Ansicht geöffnet werden kann). */
-function can_view_kirmes(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
-function can_edit_kirmes(PDO $pdo, ?array $user=null): bool { return has_role('admin'); }
 function can_reopen_protocols(): bool { return has_role('admin') || is_secretary(); }
 function can_edit_chronicle(): bool { return has_role('spiess','admin') || is_leader(); }
 function can_manage_assembly(): bool { return has_role('admin') || is_leader(); }
@@ -218,7 +216,6 @@ function function_menu_items(PDO $pdo, array $u): array {
     if(can_manage_spiess_delegation()) $items[]=['/spiess-vertretung.php','bi-person-badge','Spieß-Vertretung','Vertretung einsetzen oder wieder beenden.'];
     if(can_manage_assembly()) $items[]=['/antreten.php','bi-clock','Antreten festlegen','Nächsten Termin, Treffpunkt und Kleidung festlegen.'];
     if(can_edit_chronicle()) $items[]=['/chronik-admin.php','bi-pencil-square','Chronik verwalten','Einträge der Zug-Chronik bearbeiten und veröffentlichen.'];
-    if(can_view_kirmes($pdo,$u)) $items[]=['/kirmes.php','bi-calendar-event','Kirmes-Planung','Tage mit Antreten, Kleidung und Mitbringsel.'];
     if(can_view_stats($pdo,$u)) $items[]=['/statistik.php','bi-bar-chart','Anwesenheitsstatistik','Wer war wie oft beim Stammtisch?'];
     if(has_role('admin')) $items[]=['/admin-features.php','bi-toggles','Freischaltungen','Registrierung und optionale Funktionen zentral freischalten.'];
     return $items;

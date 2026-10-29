@@ -41,19 +41,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if ($action !== 'save') throw new RuntimeException('Unbekannte Aktion.');
 
-        $note = trim((string)($_POST['note'] ?? ''));
-        if (mb_strlen($note, 'UTF-8') > 2000) throw new RuntimeException('Die Bemerkung darf höchstens 2000 Zeichen lang sein.');
+        $longText = function (string $key, string $label): string {
+            $v = trim((string)($_POST[$key] ?? ''));
+            if (mb_strlen($v, 'UTF-8') > 2000) throw new RuntimeException('Das Feld „' . $label . '“ darf höchstens 2000 Zeichen lang sein.');
+            return $v;
+        };
+        $note = $longText('note', 'Bemerkung');
+        $bring = $longText('bring', 'Was mitbringen?');
 
         if ($existing && $existing['source'] === 'assembly') {
-            // Datum, Uhrzeit und Ort kommen vom Antreten und werden dort geändert; die Kategorie ist fest Kirmes.
-            $pdo->prepare('UPDATE calendar_events SET category=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
-                ->execute([CALENDAR_ASSEMBLY_CATEGORY, $note, $u['id'], $id]);
+            // Datum, Uhrzeit, Ort und Kleidung kommen vom Antreten und werden dort geändert; die Kategorie ist fest Kirmes.
+            $pdo->prepare('UPDATE calendar_events SET category=?,bring=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
+                ->execute([CALENDAR_ASSEMBLY_CATEGORY, $bring, $note, $u['id'], $id]);
             flash('success', 'Termin gespeichert.');
             redirect(calendar_back(substr((string)$existing['event_date'], 0, 7), (int)($_POST['back_page'] ?? 1)));
         }
 
         $category = (string)($_POST['category'] ?? '');
         if (!isset(CALENDAR_CATEGORIES[$category])) throw new RuntimeException('Bitte eine Kategorie auswählen.');
+        $attire = $longText('attire', 'Was anziehen?');
         $title = trim((string)($_POST['title'] ?? ''));
         if (mb_strlen($title, 'UTF-8') < 2 || mb_strlen($title, 'UTF-8') > 160) throw new RuntimeException('Bitte einen Namen mit 2 bis 160 Zeichen angeben.');
         $date = trim((string)($_POST['event_date'] ?? ''));
@@ -73,12 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mb_strlen($location, 'UTF-8') > 250) throw new RuntimeException('Der Ort darf höchstens 250 Zeichen lang sein.');
 
         if ($existing) {
-            $pdo->prepare('UPDATE calendar_events SET title=?,category=?,event_date=?,start_time=?,end_time=?,location=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
-                ->execute([$title, $category, $date, $start, $end, $location, $note, $u['id'], $id]);
+            $pdo->prepare('UPDATE calendar_events SET title=?,category=?,event_date=?,start_time=?,end_time=?,location=?,attire=?,bring=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
+                ->execute([$title, $category, $date, $start, $end, $location, $attire, $bring, $note, $u['id'], $id]);
             flash('success', 'Termin gespeichert.');
         } else {
-            $pdo->prepare("INSERT INTO calendar_events(title,category,event_date,start_time,end_time,location,note,source,created_by,updated_by) VALUES(?,?,?,?,?,?,?,'manual',?,?)")
-                ->execute([$title, $category, $date, $start, $end, $location, $note, $u['id'], $u['id']]);
+            $pdo->prepare("INSERT INTO calendar_events(title,category,event_date,start_time,end_time,location,attire,bring,note,source,created_by,updated_by) VALUES(?,?,?,?,?,?,?,?,?,'manual',?,?)")
+                ->execute([$title, $category, $date, $start, $end, $location, $attire, $bring, $note, $u['id'], $u['id']]);
             flash('success', 'Termin eingetragen.');
         }
         redirect(calendar_back(substr($date, 0, 7), (int)($_POST['back_page'] ?? 1)));
@@ -189,6 +195,8 @@ require __DIR__ . '/includes/header.php';
                 <span class="cal-list-body">
                   <strong class="d-block"><?= e($entry['title']) ?></strong>
                   <span class="d-block small"><i class="bi bi-clock me-1"></i><?= e($entry['timeLabel']) ?><?php if ($entry['location'] !== ''): ?> · <i class="bi bi-geo-alt me-1"></i><?= e($entry['location']) ?><?php endif; ?></span>
+                  <?php if ($entry['attire'] !== ''): ?><span class="d-block small cal-list-note"><i class="bi bi-person-standing me-1"></i><?= e($entry['attire']) ?></span><?php endif; ?>
+                  <?php if ($entry['bring'] !== ''): ?><span class="d-block small cal-list-note"><i class="bi bi-bag me-1"></i><?= e($entry['bring']) ?></span><?php endif; ?>
                   <?php if ($entry['note'] !== ''): ?><span class="d-block small text-secondary cal-list-note"><?= e($entry['note']) ?></span><?php endif; ?>
                   <span class="d-block small text-secondary">Eingetragen von <?= e($entry['author']) ?></span>
                 </span>
@@ -222,7 +230,7 @@ require __DIR__ . '/includes/header.php';
   <div class="modal-body">
     <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="0">
     <input type="hidden" name="back_month" value="<?= e($monthKey) ?>"><input type="hidden" name="back_page" value="<?= $page ?>">
-    <div class="alert alert-info small py-2" data-assembly-hint hidden>Dieser Termin kommt vom Antreten und gehört fest zur Kategorie Kirmes. Datum, Uhrzeit und Ort änderst du auf der <a href="/antreten.php">Antreten-Seite</a>.</div>
+    <div class="alert alert-info small py-2" data-assembly-hint hidden>Dieser Termin kommt vom Antreten und gehört fest zur Kategorie Kirmes. Datum, Uhrzeit, Ort und Kleidung änderst du auf der <a href="/antreten.php">Antreten-Seite</a>.</div>
     <div class="row g-2">
       <div class="col-12" data-free><label class="form-label small" for="calTitle">Name des Termins</label><input class="form-control" id="calTitle" name="title" maxlength="160" required placeholder="z. B. Kirmesumzug"></div>
       <div class="col-12" data-free><span class="form-label small d-block">Kategorie</span>
@@ -237,6 +245,8 @@ require __DIR__ . '/includes/header.php';
       <div class="col-6 col-sm-3" data-free><label class="form-label small" for="calEnd">Bis</label><input type="time" class="form-control" id="calEnd" name="end_time"></div>
       <div class="col-12" data-free><small class="text-secondary">Ohne Uhrzeit gilt der Termin als ganztägig.</small></div>
       <div class="col-12" data-free><label class="form-label small" for="calLocation">Ort</label><input class="form-control" id="calLocation" name="location" maxlength="250" placeholder="z. B. Festzelt, Vereinsheim …"></div>
+      <div class="col-12" data-free><label class="form-label small" for="calAttire">Was anziehen?</label><textarea class="form-control" id="calAttire" name="attire" rows="2" maxlength="2000" placeholder="z. B. Uniform komplett, Zugshirt …"></textarea></div>
+      <div class="col-12"><label class="form-label small" for="calBring">Was mitbringen?</label><textarea class="form-control" id="calBring" name="bring" rows="2" maxlength="2000" placeholder="z. B. Fahne, Bierdeckel, Kuchen (wer?) …"></textarea></div>
       <div class="col-12"><label class="form-label small" for="calNote">Bemerkung</label><textarea class="form-control" id="calNote" name="note" rows="3" maxlength="2000"></textarea></div>
     </div>
   </div>
@@ -298,6 +308,8 @@ require __DIR__ . '/includes/header.php';
     body.append(row('bi-calendar3', 'Datum', x.dateLabel), row('bi-clock', 'Uhrzeit', x.timeLabel));
     if (x.location) body.append(row('bi-geo-alt', 'Ort', x.location));
     body.append(row('bi-person', 'Eingetragen von', x.author));
+    if (x.attire) body.append(row('bi-person-standing', 'Was anziehen?', x.attire));
+    if (x.bring) body.append(row('bi-bag', 'Was mitbringen?', x.bring));
     if (x.note) body.append(row('bi-chat-left-text', 'Bemerkung', x.note));
     if (x.kind === 'meeting') body.append(el('p', 'small text-secondary mt-3 mb-0', 'Kommt automatisch aus dem Stammtisch.'));
     if (x.source === 'assembly') body.append(el('p', 'small text-secondary mt-3 mb-0', 'Kommt automatisch aus dem Antreten.'));
@@ -341,9 +353,11 @@ require __DIR__ . '/includes/header.php';
     set('end_time', x ? x.end : '');
     set('location', x ? x.location : '');
     set('note', x ? x.note : '');
+    set('attire', x ? x.attire : '');
+    set('bring', x ? x.bring : '');
     f.querySelectorAll('[name=category]').forEach(r => r.checked = !!(x && r.value === x.category));
     f.querySelector('[data-assembly-hint]').hidden = !assembly;
-    f.querySelectorAll('[data-free]').forEach(c => { c.hidden = assembly; c.querySelectorAll('input').forEach(i => i.disabled = assembly); });
+    f.querySelectorAll('[data-free]').forEach(c => { c.hidden = assembly; c.querySelectorAll('input, textarea').forEach(i => i.disabled = assembly); });
     bootstrap.Modal.getInstance(showEl)?.hide();
     bootstrap.Modal.getOrCreateInstance(document.getElementById('calEditModal')).show();
   }
