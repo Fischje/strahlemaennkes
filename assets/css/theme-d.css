@@ -275,3 +275,46 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .drink-favorite-btn.active { background:#FFF3C4; border-color:#E0B100; color:#B07A00; }
 .member-card { background:#fff; border-color:var(--sm-border-dark); border-radius:var(--sm-radius-lg); color:var(--sm-text); }
 .wysiwyg-shell { background:#fff; border-color:#CFC7B7; border-radius:var(--sm-radius); }
+
+/* Kalender (0.7.28): Monatsraster mit bis zu drei Einträgen je Tag, Liste der nächsten Termine */
+.cal-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); border-top:1px solid var(--sm-border); border-left:1px solid var(--sm-border); }
+.cal-weekday { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--sm-muted); text-align:center; padding:.35rem 0; background:var(--sm-surface-2); border-right:1px solid var(--sm-border); border-bottom:1px solid var(--sm-border); }
+.cal-day { min-height:104px; padding:.25rem; border-right:1px solid var(--sm-border); border-bottom:1px solid var(--sm-border); background:#fff; display:flex; flex-direction:column; gap:2px; cursor:pointer; min-width:0; transition:background-color .15s ease; }
+.cal-day:hover, .cal-day:focus-visible { background:#FBF9F5; outline:none; }
+.cal-day:focus-visible { box-shadow:inset 0 0 0 2px var(--sm-red); }
+.cal-day.is-weekend { background:#FCFBF8; }
+.cal-day.is-other { background:var(--sm-surface-2); }
+.cal-day.is-other .cal-num { color:#A49C8C; }
+.cal-num { font-size:.8rem; font-weight:600; line-height:1.5rem; width:1.5rem; text-align:center; border-radius:50%; align-self:flex-end; }
+.cal-day.is-today .cal-num { background:var(--sm-red); color:#fff; }
+.cal-chip { display:block; width:100%; border:0; border-radius:3px; padding:1px 4px; font-size:.72rem; line-height:1.3; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:var(--cal-c); color:var(--cal-t); cursor:pointer; }
+.cal-chip:hover { filter:brightness(1.08); }
+.cal-chip-time { font-weight:700; }
+.cal-more { font-size:.7rem; color:var(--sm-muted); padding-left:2px; }
+.cal-badge { display:inline-block; border-radius:999px; padding:.15rem .6rem; font-size:.75rem; font-weight:600; background:var(--cal-c); color:var(--cal-t); }
+/* Handy: Einträge als farbige Balken, Antippen des Tages zeigt die Details */
+@media (max-width:575.98px){
+  .cal-panel { padding-left:.5rem !important; padding-right:.5rem !important; }
+  .cal-day { min-height:64px; padding:2px; }
+  .cal-chip { height:6px; padding:0; font-size:0; pointer-events:none; }
+  .cal-more { font-size:.62rem; line-height:1; }
+  .cal-num { align-self:center; font-size:.75rem; }
+}
+.cal-list li + li { margin-top:.5rem; }
+.cal-list-item { display:flex; gap:.75rem; width:100%; text-align:left; background:#fff; border:1px solid var(--sm-border); border-left:5px solid var(--cal-c); border-radius:var(--sm-radius); padding:.6rem .75rem; color:var(--sm-text); transition:border-color .15s ease, transform .15s ease; }
+.cal-list-item:hover { border-color:#C9C0AE; border-left-color:var(--cal-c); transform:translateY(-1px); }
+.cal-list-date { flex:0 0 2.75rem; display:flex; flex-direction:column; align-items:center; line-height:1.1; font-size:.72rem; color:var(--sm-muted); }
+.cal-list-date strong { font-size:1.35rem; color:var(--sm-text); }
+.cal-list-wd { font-weight:700; text-transform:uppercase; }
+.cal-list-body { min-width:0; flex:1; }
+.cal-list-note { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-detail-row { display:flex; gap:.75rem; margin-top:.85rem; }
+.cal-detail-row > i { color:var(--sm-muted); font-size:1.1rem; margin-top:.15rem; }
+.cal-detail-value { white-space:pre-wrap; overflow-wrap:anywhere; }
+.cal-cat-picker { display:flex; flex-wrap:wrap; gap:.4rem; }
+.cal-cat-option { position:relative; cursor:pointer; margin:0; }
+.cal-cat-option input { position:absolute; opacity:0; inset:0; }
+.cal-cat-option span { display:inline-flex; align-items:center; gap:.35rem; border-radius:999px; padding:.3rem .75rem; font-size:.85rem; font-weight:600; background:var(--cal-c); color:var(--cal-t); opacity:.55; border:2px solid transparent; transition:opacity .15s ease; }
+.cal-cat-option input:checked + span { opacity:1; border-color:var(--sm-text); }
+.cal-cat-option input:checked + span::before { content:"\2713"; }
+.cal-cat-option input:focus-visible + span { outline:2px solid var(--sm-red); outline-offset:2px; }

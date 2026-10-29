@@ -20,6 +20,7 @@ function side_active(string $path, string $current): string { return $path === $
     <a class="<?= side_active('/dashboard.php',$sidePath) ?>" href="/dashboard.php"><i class="bi bi-grid"></i> Übersicht</a>
     <a class="<?= side_active('/member-drink.php',$sidePath) ?>" href="/member-drink.php"><i class="bi bi-cup-straw"></i> Mein Getränk</a>
     <a class="<?= side_active('/stammtisch.php',$sidePath) ?>" href="/stammtisch.php"><i class="bi bi-calendar2-check"></i> Stammtisch</a>
+    <a class="<?= side_active('/calendar.php',$sidePath) ?>" href="/calendar.php"><i class="bi bi-calendar-event"></i> Kalender</a>
     <a class="<?= side_active('/fines.php',$sidePath) ?>" href="/fines.php"><i class="bi bi-receipt"></i> Runden</a>
     <a class="<?= side_active('/theke.php',$sidePath) ?>" href="/theke.php"><i class="bi bi-list-check"></i> Thekenansicht</a>
     <a class="<?= side_active('/protokolle.php',$sidePath) ?>" href="/protokolle.php"><i class="bi bi-journal-text"></i> Protokolle</a>
@@ -36,8 +37,6 @@ function side_active(string $path, string $current): string { return $path === $
       <a class="<?= side_active('/functions.php',$sidePath) ?>" href="/functions.php"><i class="bi bi-grid-3x3-gap"></i> Funktionen</a>
     <?php endif; ?>
 
-    <hr class="border-secondary">
-    <a class="<?= side_active('/calendar.php',$sidePath) ?>" href="/calendar.php"><i class="bi bi-calendar-event"></i> Kalender <span class="badge text-bg-secondary ms-auto">später</span></a>
 
     <hr class="border-secondary">
     <a href="/logout.php"><i class="bi bi-box-arrow-right"></i> Abmelden</a>

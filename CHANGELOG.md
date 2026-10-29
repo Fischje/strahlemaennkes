@@ -1,5 +1,13 @@
 # Changelog
 
+## Beta 0.7.28 – 29.10.2026
+
+- Neu: Kalender mit Monatsansicht. Mit den Pfeilen geht es zum vorherigen und nächsten Monat, „Heute“ springt zurück. Pro Tag sind bis zu drei Termine sichtbar, weitere stehen als „+N weitere“ darunter; ein Tipp auf den Tag zeigt alle.
+- Neben dem Monat steht die Liste der nächsten 10 Termine zum Blättern – mit Name, Ort, Uhrzeit, Bemerkung und wer den Termin eingetragen hat.
+- Feste Kategorien mit Farben: Früh-Kirmes (grün), Spät-Kirmes (dunkelgrün), Zugtreffen (gelb), Außerhalb Kirmes (grau), Großer Ausflug (rot) und Weihnachtsfeier (dunkelrot).
+- Termine eintragen, ändern und löschen können Zugführer, Spieß, Schriftführer und Admin.
+- Antreten und festgelegte Stammtische erscheinen automatisch im Kalender.
+
 ## Beta 0.7.27 – 29.10.2026
 
 - Die neue Adresse der App wird strahlemaennkes.de (ohne Umlaut) – lässt sich überall leichter tippen und wird in WhatsApp und Mails zuverlässig als Link erkannt.

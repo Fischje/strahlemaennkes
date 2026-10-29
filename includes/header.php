@@ -66,6 +66,7 @@ header('Pragma: no-cache');
           <li class="nav-item"><a class="nav-link" href="/dashboard.php">Übersicht</a></li>
           <li class="nav-item"><a class="nav-link" href="/member-drink.php">Mein Getränk</a></li>
           <li class="nav-item"><a class="nav-link" href="/stammtisch.php">Stammtisch</a></li>
+          <li class="nav-item"><a class="nav-link" href="/calendar.php">Kalender</a></li>
           <li class="nav-item"><a class="nav-link" href="/fines.php">Runden</a></li>
           <li class="nav-item"><a class="nav-link" href="/theke.php">Theke</a></li>
           <li class="nav-item"><a class="nav-link" href="/protokolle.php">Protokolle</a></li>
