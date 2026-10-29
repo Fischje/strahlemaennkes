@@ -13,6 +13,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/push.php';
+require_once __DIR__ . '/site-images.php';
 
 function e(?string $value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 
@@ -217,6 +218,7 @@ function function_menu_items(PDO $pdo, array $u): array {
     if(can_manage_assembly()) $items[]=['/antreten.php','bi-clock','Antreten festlegen','Nächsten Termin, Treffpunkt und Kleidung festlegen.'];
     if(can_edit_chronicle()) $items[]=['/chronik-admin.php','bi-pencil-square','Chronik verwalten','Einträge der Zug-Chronik bearbeiten und veröffentlichen.'];
     if(can_view_stats($pdo,$u)) $items[]=['/statistik.php','bi-bar-chart','Anwesenheitsstatistik','Wer war wie oft beim Stammtisch?'];
+    if(can_manage_site_images()) $items[]=['/bilder.php','bi-images','Bilder der Seite','Hintergrund-Muster und Gruppenfoto der Chronik.'];
     if(has_role('admin')) $items[]=['/admin-features.php','bi-toggles','Freischaltungen','Registrierung und optionale Funktionen zentral freischalten.'];
     return $items;
 }
@@ -280,19 +282,6 @@ function active_round_for_user(PDO $pdo, int $userId): ?array {
 }
 
 /** Zeitstempel des Hintergrundbilds (null, wenn keines hochgeladen ist). Wird für den Cache-Parameter der Bild-URL genutzt. */
-/** Angehakte Hintergrundbilder als Liste von Adressen (mit Versionsstempel für den Browser-Cache). */
-function site_background_urls(PDO $pdo): array {
-    static $urls=null;
-    if($urls===null){
-        try{
-            $rows=$pdo->query('SELECT id,EXTRACT(EPOCH FROM updated_at)::bigint AS ts FROM site_backgrounds WHERE is_active=1 ORDER BY id')->fetchAll();
-            $urls=array_map(fn($r)=>'/background.php?id='.(int)$r['id'].'&v='.(int)$r['ts'],$rows);
-        }catch(Throwable $e){ $urls=[]; }
-    }
-    return $urls;
-}
-/** Sekunden, nach denen das nächste Hintergrundbild eingeblendet wird. */
-const SITE_BACKGROUND_INTERVAL=30;
 function app_version(): array {
     static $version = null;
     if ($version === null) $version = require __DIR__ . '/version.php';
@@ -662,7 +651,7 @@ function legacy_push_condition(array &$params): string {
 function enforce_domain_move(): void {
     if (!request_is_legacy_host()) return;
     $script = (string)($_SERVER['SCRIPT_NAME'] ?? '');
-    if (in_array($script, ['/umzug.php', '/background.php'], true)) return;
+    if (in_array($script, ['/umzug.php', '/site-image.php'], true)) return;
     header('Cache-Control: no-store');
     if ($script === '/calendar-feed.php') {
         // Kalender-Abos von der alten Adresse dauerhaft auf die neue umleiten, damit sie weiterlaufen.

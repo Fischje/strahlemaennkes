@@ -26,10 +26,10 @@
 }
 html { background:#0B0C0E !important; }
 body { background:transparent !important; color:var(--sm-text); }
-/* Hintergrundbild: liegt fest hinter der Seite und scheint zu 15 % durch (Bild wird im Adminbereich ausgetauscht). */
+/* Hintergrund-Muster: liegt fest hinter der Seite, wird gekachelt und scheint zu 15 % durch (Funktionen → Bilder der Seite). */
 body::before {
   content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background-image:var(--sm-bg-image, none); background-size:100% auto; background-position:center; background-repeat:no-repeat; /* immer volle Bildschirmbreite */
+  background-image:var(--sm-bg-image, none); background-size:auto; background-position:top left; background-repeat:repeat; /* Muster wird gekachelt */
   opacity:.15;
 }
 main, .app-footer { position:relative; z-index:1; }
@@ -346,13 +346,10 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .app-navbar .nav-group-menu .dropdown-item.active { color:var(--sm-red) !important; }
 @media (max-width:991.98px){ .app-navbar .nav-link.active { padding-left:.6rem; padding-right:.6rem; } }
 
-/* Wechselnde Hintergrundbilder (0.7.37): zwei Ebenen, die per Deckkraft überblenden */
-.sm-bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; background-size:100% auto; background-position:center; background-repeat:no-repeat; opacity:0; transition:opacity 2.5s ease; }
-.sm-bg-layer.is-on { opacity:.15; }
-html.sm-bg-rotating body::before { background-image:none; }
-@media (prefers-reduced-motion:reduce){ .sm-bg-layer { transition:none; } }
-.bg-admin-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.75rem; }
-.bg-admin-item { border:1px solid var(--sm-border-dark); border-radius:var(--sm-radius-lg); overflow:hidden; background:#fff; opacity:.6; transition:opacity .15s ease; }
-.bg-admin-item.is-on { opacity:1; border-color:var(--sm-text); }
-.bg-admin-item img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:#0B0C0E; }
-#hintergrund { scroll-margin-top:110px; }
+/* Bilder der Seite (0.7.38): Vorschau Muster/Gruppenfoto, Gruppenfoto in der Chronik */
+.site-image-panel { scroll-margin-top:110px; }
+.site-image-pattern-preview { height:160px; border:1px solid var(--sm-border-dark); border-radius:var(--sm-radius); background-color:#0B0C0E; background-repeat:repeat; }
+.site-image-photo-preview { display:block; width:100%; max-height:260px; object-fit:cover; border-radius:var(--sm-radius); border:1px solid var(--sm-border-dark); }
+.chronik-group-photo { margin:0; padding:0; overflow:hidden; }
+.chronik-group-photo img { display:block; width:100%; height:auto; }
+.chronik-group-photo figcaption { padding:.6rem 1rem; font-size:.9rem; color:var(--sm-muted); text-align:center; }

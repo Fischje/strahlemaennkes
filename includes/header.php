@@ -32,11 +32,8 @@ header('Pragma: no-cache');
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="/assets/css/app.css?v=<?= e($version['cache_key']) ?>">
   <link rel="stylesheet" href="/assets/css/theme-d.css?v=<?= e($version['cache_key']) ?>">
-<?php $bgUrls=isset($pdo) ? site_background_urls($pdo) : []; if($bgUrls):
-  // Startbild nach Uhrzeit wählen – app.js rechnet genauso, so passt es beim Seitenwechsel ohne Sprung. ?>
-  <style>:root{--sm-bg-image:url('<?= $bgUrls[intdiv(time(),SITE_BACKGROUND_INTERVAL)%count($bgUrls)] /* nur Zahlen, kein Escaping im CSS nötig */ ?>')}</style>
-<?php if(count($bgUrls)>1): ?>  <script>window.SM_BACKGROUNDS={urls:<?= json_encode($bgUrls, JSON_UNESCAPED_SLASHES|JSON_HEX_TAG) ?>,interval:<?= SITE_BACKGROUND_INTERVAL ?>};</script>
-<?php endif; endif; ?>
+<?php if(isset($pdo)&&($patternUrl=site_image_url($pdo,'pattern'))): ?>  <style>:root{--sm-bg-image:url('<?= $patternUrl ?>')}</style>
+<?php endif; ?>
 </head>
 <body class="<?= trim(($u ? 'has-mobile-nav ' : '') . ($bodyClass ?? '')) ?>">
 <nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">

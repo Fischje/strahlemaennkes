@@ -15,6 +15,12 @@ require __DIR__.'/../includes/header.php';
 </section>
 <section class="py-5">
   <div class="container">
+    <?php if($groupPhotoUrl=site_image_url($pdo,'group_photo')): $groupPhoto=site_image_info($pdo,'group_photo'); ?>
+      <figure class="panel chronik-group-photo mb-4">
+        <img src="<?= e($groupPhotoUrl) ?>" width="<?= (int)$groupPhoto['width'] ?>" height="<?= (int)$groupPhoto['height'] ?>" alt="<?= e($groupPhoto['caption'] !== '' ? $groupPhoto['caption'] : 'Gruppenfoto der Strahlemännkes') ?>">
+        <?php if($groupPhoto['caption'] !== ''): ?><figcaption><?= e($groupPhoto['caption']) ?></figcaption><?php endif; ?>
+      </figure>
+    <?php endif; ?>
     <?php if(!$years): ?>
       <div class="panel p-4 p-md-5 text-center">
         <div class="fs-1 mb-3">📖</div>

@@ -36,7 +36,7 @@ Interne, mobile Web-App (PWA) für den Schützenzug **„Strahlemännkes“**: G
 
 - **Mitglied:** eigenes Getränk, Runden und Kasse lesen, Stammtisch abstimmen und zu-/absagen, Themen vorschlagen, Protokolle lesen.
 - **Spieß** (auch eine eingesetzte Spieß-Vertretung): Getränke und Theke, Runden verwalten, Sektbar, Terminfindung starten, Protokoll führen.
-- **Administrator:** Benutzerverwaltung, Freischaltungen (Registrierung, Sektbar, Hintergrundbild), Statistik.
+- **Administrator:** Benutzerverwaltung, Freischaltungen (Registrierung, Sektbar), Bilder der Seite (Hintergrund-Muster, Gruppenfoto der Chronik), Statistik.
 - Zusatzämter unabhängig von der Rolle: **Zugführer** (Antreten, Chronik, Stammtisch, für andere zu-/absagen), **Kassierer** (Kasse), **Schriftführer** (Protokoll, Protokolle wieder öffnen).
 
 ## Sicherheit

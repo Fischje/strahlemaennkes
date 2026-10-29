@@ -1,5 +1,12 @@
 # Changelog
 
+## Beta 0.7.38 – 29.10.2026
+
+- Neu unter Funktionen: „Bilder der Seite“ mit dem Hintergrund-Muster und dem Gruppenfoto der Chronik.
+- Hintergrund: Statt wechselnder Fotos gibt es jetzt ein Muster, das über die ganze Seite wiederholt wird und zu 15 % durchscheint. Transparente PNG-Muster bleiben transparent.
+- Chronik: Über dem Zeitstrahl kann ein Gruppenfoto mit optionaler Bildunterschrift stehen.
+- Die wechselnden Hintergrundbilder sind entfernt.
+
 ## Beta 0.7.37 – 29.10.2026
 
 - Mehrere Hintergrundbilder: Unter Funktionen → Freischaltungen lassen sich jetzt beliebig viele Bilder hochladen, auch mehrere auf einmal.
