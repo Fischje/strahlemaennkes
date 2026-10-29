@@ -1,20 +1,17 @@
-# Domain-Umzug: sm.fischje.de → strahlemännkes.de
+# Domain-Umzug: sm.fischje.de → strahlemaennkes.de
 
 Ab Version 0.7.26 kann die App selbst umziehen. Server, Datenbank, Reverse Proxy und Code bleiben gleich,
 nur die Adresse ändert sich.
 
-**Wichtig:** Umlaut-Domains stehen in DNS, Proxy und Konfiguration immer in Punycode:
-
-| lesbar              | technisch (Punycode)        |
-|---------------------|-----------------------------|
-| `strahlemännkes.de` | `xn--strahlemnnkes-ifb.de`  |
+Die neue Adresse ist bewusst **ohne Umlaut**: `strahlemaennkes.de`. Sie lässt sich überall tippen, wird in
+WhatsApp und Mails zuverlässig als Link erkannt und braucht keine Punycode-Schreibweise.
 
 ## Was die App beim Umzug macht
 
 Eingeschaltet wird der Umzug über zwei Werte in der php-fpm-Pool-Datei (oder `config.php`):
 
 ```
-env[APP_URL] = https://xn--strahlemnnkes-ifb.de
+env[APP_URL] = https://strahlemaennkes.de
 env[APP_LEGACY_HOSTS] = sm.fischje.de
 ```
 
@@ -40,13 +37,13 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 
 1. **DNS:** Domain in Cloudflare aufnehmen (wie fischje.de), Nameserver beim Registrar auf Cloudflare stellen.
    Einträge wie bei `sm.fischje.de` (gleiches Ziel, Proxy „orange“). SSL-Modus wie bei fischje.de.
-2. **Reverse Proxy:** `xn--strahlemnnkes-ifb.de` als **zusätzlichen** Hostnamen auf dasselbe Ziel legen
-   (z. B. `server_name sm.fischje.de xn--strahlemnnkes-ifb.de;`). Zertifikat für die neue Domain besorgen bzw.
+2. **Reverse Proxy:** `strahlemaennkes.de` als **zusätzlichen** Hostnamen auf dasselbe Ziel legen
+   (z. B. `server_name sm.fischje.de strahlemaennkes.de;`). Zertifikat für die neue Domain besorgen bzw.
    ins vorhandene aufnehmen. Die alte Adresse **nicht** umleiten – sie muss weiter bei PHP ankommen.
    Der Proxy muss den echten `Host`-Header durchreichen (tut er heute schon, sonst ginge die App nicht).
-3. **Test:** `https://strahlemännkes.de` aufrufen. Die App muss normal laufen (Login ist dort getrennt, das ist richtig).
-4. Empfehlung: auch `strahlemaennkes.de` (ohne Umlaut) sichern und per 301 auf die neue Adresse leiten.
-   Umlaut-Adressen tippen sich auf manchen Tastaturen schlecht und werden nicht überall als Link erkannt.
+3. **Test:** `https://strahlemaennkes.de` aufrufen. Die App muss normal laufen (Login ist dort getrennt, das ist richtig).
+4. Optional: Wer mag, sichert zusätzlich `strahlemännkes.de` und leitet sie per 301 auf `strahlemaennkes.de` um.
+   Im Proxy und bei Cloudflare heißt sie dann `xn--strahlemnnkes-ifb.de` (Punycode-Schreibweise der Umlaut-Domain).
 
 ### 2. Umschalten (5 Minuten)
 
@@ -55,7 +52,7 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 2. `sudo systemctl reload php*-fpm` (der Cron-Wrapper liest dieselbe Pool-Datei, nichts weiter zu tun).
 3. Prüfen:
    - `https://sm.fischje.de/dashboard.php` → Umzugsseite.
-   - Knopf „Weiter zur neuen Adresse“ → angemeldet auf `strahlemännkes.de`.
+   - Knopf „Weiter zur neuen Adresse“ → angemeldet auf `strahlemaennkes.de`.
    - „Passwort vergessen“ schickt einen Link mit der neuen Adresse.
    - Admin-Karte „Umzug“ unter Funktionen → Freischaltungen erscheint.
 
@@ -69,7 +66,7 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 
 ### 4. Abschluss
 
-Wenn (fast) alle umgezogen sind: im Reverse Proxy `sm.fischje.de` per **301** auf `https://xn--strahlemnnkes-ifb.de$request_uri`
+Wenn (fast) alle umgezogen sind: im Reverse Proxy `sm.fischje.de` per **301** auf `https://strahlemaennkes.de$request_uri`
 umleiten. Danach funktionieren Umzugsseite und automatische Anmeldung von der alten Adresse aus nicht mehr,
 Nachzügler melden sich einfach mit Passwort an. Die Weiterleitung mindestens ein Jahr stehen lassen.
 
@@ -83,7 +80,7 @@ Nachzügler melden sich einfach mit Passwort an. Die Weiterleitung mindestens ei
 
 ## WhatsApp-Vorschlag
 
-> 📦 **Unsere Zug-App zieht um!** Neue Adresse: **strahlemännkes.de**
+> 📦 **Unsere Zug-App zieht um!** Neue Adresse: **strahlemaennkes.de**
 > Öffnet einfach einmal die alte App (oder sm.fischje.de) und tippt auf „Weiter zur neuen Adresse“ –
 > ihr seid dann automatisch angemeldet. Danach: neue App installieren, Mitteilungen erlauben, altes Symbol löschen.
 > Dauert eine Minute. Fragen gerne an mich. 🍻

@@ -16,7 +16,7 @@ Interne, mobile Web-App (PWA) für den Schützenzug **„Strahlemännkes“**: G
 2. `composer install --no-dev --optimize-autoloader` im App-Verzeichnis.
 3. `config.php` liegt nur auf dem Server (nicht im Repo, siehe `.gitignore`) und liest die Zugangsdaten aus Umgebungsvariablen der php-fpm-Pool-Datei:
    - `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, optional `PGSSLMODE`
-   - `APP_URL` bzw. `base_url` in `config.php` (z. B. `https://xn--strahlemnnkes-ifb.de`, Umlaut-Domains in Punycode) – **wichtig**: daraus werden die Links in Passwort-Reset-Mails gebaut. Ist kein Wert gesetzt, nimmt die App den Host aus der Anfrage, und der ist von außen beeinflussbar.
+   - `APP_URL` bzw. `base_url` in `config.php` (z. B. `https://strahlemaennkes.de`; Umlaut-Domains in Punycode, `xn--…`) – **wichtig**: daraus werden die Links in Passwort-Reset-Mails gebaut. Ist kein Wert gesetzt, nimmt die App den Host aus der Anfrage, und der ist von außen beeinflussbar.
    - `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` für Push
    - optional `APP_LEGACY_HOSTS` bzw. `legacy_hosts` in `config.php` (kommagetrennt, Umlaut-Domains in Punycode): alte Adressen nach einem Domain-Umzug. Dort ist dann nur noch die Umzugsseite `umzug.php` erreichbar. Ablauf siehe `docs/domain-umzug.md`.
 4. Ordner für geschützte Dateien (außerhalb des Webroots):

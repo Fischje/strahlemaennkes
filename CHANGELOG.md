@@ -1,8 +1,12 @@
 # Changelog
 
+## Beta 0.7.27 – 29.10.2026
+
+- Die neue Adresse der App wird strahlemaennkes.de (ohne Umlaut) – lässt sich überall leichter tippen und wird in WhatsApp und Mails zuverlässig als Link erkannt.
+
 ## Beta 0.7.26 – 29.10.2026
 
-- Vorbereitung für den Umzug auf die neue Adresse strahlemännkes.de: Wer die alte Adresse oder die alte App öffnet, sieht eine Umzugsseite und kommt mit einem Tipp angemeldet auf die neue Adresse.
+- Vorbereitung für den Umzug auf eine neue Adresse: Wer die alte Adresse oder die alte App öffnet, sieht eine Umzugsseite und kommt mit einem Tipp angemeldet auf die neue Adresse.
 - Neue Seite „Umzug“ mit Anleitung zum Installieren der neuen App, zum Einschalten der Push-Mitteilungen und zum Löschen des alten App-Symbols.
 - Push-Mitteilungen kommen nach dem Umzug nicht doppelt: Sobald Push in der neuen App eingeschaltet ist, schweigt die alte.
 - Admins sehen unter Funktionen → Freischaltungen, wer schon umgezogen ist, und können eine Umzugs-Erinnerung an die alte App schicken.
