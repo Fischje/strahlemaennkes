@@ -1,5 +1,13 @@
 # Changelog
 
+## Beta 0.7.29 – 29.10.2026
+
+- Kalender aufs Handy: Jedes Mitglied kann den Kalender über „Aufs Handy abonnieren“ in den Kalender von iPhone, Android (Google Kalender) oder Computer übernehmen. Neue, geänderte und gelöschte Termine kommen automatisch nach.
+- Das Abo ist nur zum Ansehen – Termine werden weiterhin ausschließlich hier in der App eingetragen und geändert.
+- Jeder bekommt einen persönlichen Abo-Link, der sich bei Bedarf erneuern lässt.
+- Kategorien: Früh- und Spät-Kirmes sind zu „Kirmes“ (grün) zusammengelegt; „Großer Ausflug“ heißt jetzt „Grober Ausflug“.
+- Antreten steht im Kalender immer unter „Kirmes“.
+
 ## Beta 0.7.28 – 29.10.2026
 
 - Neu: Kalender mit Monatsansicht. Mit den Pfeilen geht es zum vorherigen und nächsten Monat, „Heute“ springt zurück. Pro Tag sind bis zu drei Termine sichtbar, weitere stehen als „+N weitere“ darunter; ein Tipp auf den Tag zeigt alle.

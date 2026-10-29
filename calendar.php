@@ -17,6 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $back = calendar_back((string)($_POST['back_month'] ?? ''), (int)($_POST['back_page'] ?? 1));
     try {
+        if (in_array((string)($_POST['action'] ?? ''), ['feed_create', 'feed_renew'], true)) {
+            $had = calendar_feed_token($pdo, (int)$u['id']) !== null;
+            calendar_feed_renew($pdo, (int)$u['id']);
+            flash('success', $had ? 'Neuer Abo-Link erstellt. Der alte Link funktioniert nicht mehr – bitte auf deinen Geräten neu abonnieren.' : 'Dein Abo-Link ist fertig.');
+            redirect($back . (str_contains($back, '?') ? '&' : '?') . 'abo=1');
+        }
         if (!$canEdit) throw new RuntimeException('Den Kalender dürfen nur Zugführer, Spieß, Schriftführer und Admin pflegen.');
         $action = (string)($_POST['action'] ?? '');
         $id = (int)($_POST['id'] ?? 0);
@@ -35,19 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if ($action !== 'save') throw new RuntimeException('Unbekannte Aktion.');
 
-        $category = (string)($_POST['category'] ?? '');
-        if (!isset(CALENDAR_CATEGORIES[$category])) throw new RuntimeException('Bitte eine Kategorie auswählen.');
         $note = trim((string)($_POST['note'] ?? ''));
         if (mb_strlen($note, 'UTF-8') > 2000) throw new RuntimeException('Die Bemerkung darf höchstens 2000 Zeichen lang sein.');
 
         if ($existing && $existing['source'] === 'assembly') {
-            // Datum, Uhrzeit und Ort kommen vom Antreten und werden dort geändert.
+            // Datum, Uhrzeit und Ort kommen vom Antreten und werden dort geändert; die Kategorie ist fest Kirmes.
             $pdo->prepare('UPDATE calendar_events SET category=?,note=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
-                ->execute([$category, $note, $u['id'], $id]);
+                ->execute([CALENDAR_ASSEMBLY_CATEGORY, $note, $u['id'], $id]);
             flash('success', 'Termin gespeichert.');
             redirect(calendar_back(substr((string)$existing['event_date'], 0, 7), (int)($_POST['back_page'] ?? 1)));
         }
 
+        $category = (string)($_POST['category'] ?? '');
+        if (!isset(CALENDAR_CATEGORIES[$category])) throw new RuntimeException('Bitte eine Kategorie auswählen.');
         $title = trim((string)($_POST['title'] ?? ''));
         if (mb_strlen($title, 'UTF-8') < 2 || mb_strlen($title, 'UTF-8') > 160) throw new RuntimeException('Bitte einen Namen mit 2 bis 160 Zeichen angeben.');
         $date = trim((string)($_POST['event_date'] ?? ''));
@@ -121,6 +127,11 @@ $pageUrl = fn(int $p) => calendar_back($monthKey, $p);
 $chipStyle = fn(string $cat) => '--cal-c:' . CALENDAR_CATEGORIES[$cat]['color'] . ';--cal-t:' . CALENDAR_CATEGORIES[$cat]['text'];
 $maxPerDay = 3;
 
+$feedToken = calendar_feed_token($pdo, (int)$u['id']);
+$feedUrl = $feedToken ? calendar_feed_url($feedToken) : '';
+$feedWebcal = $feedUrl ? preg_replace('#^https?://#', 'webcal://', $feedUrl) : '';
+$openFeed = isset($_GET['abo']);
+
 $pageTitle = 'Kalender';
 require __DIR__ . '/includes/header.php';
 ?>
@@ -129,7 +140,10 @@ require __DIR__ . '/includes/header.php';
   <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
     <div><div class="eyebrow">Termine des Zuges</div><h1 class="section-title h2 mb-1">Kalender</h1>
       <p class="text-secondary mb-0">Antreten und festgelegte Stammtische erscheinen automatisch.</p></div>
-    <?php if ($canEdit): ?><button type="button" class="btn btn-brand" data-cal-new="<?= e($today) ?>"><i class="bi bi-plus-lg me-1"></i> Termin eintragen</button><?php endif; ?>
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#calFeedModal"><i class="bi bi-phone me-1"></i> Aufs Handy abonnieren</button>
+      <?php if ($canEdit): ?><button type="button" class="btn btn-brand" data-cal-new="<?= e($today) ?>"><i class="bi bi-plus-lg me-1"></i> Termin eintragen</button><?php endif; ?>
+    </div>
   </div>
 
   <div class="row g-4">
@@ -208,10 +222,10 @@ require __DIR__ . '/includes/header.php';
   <div class="modal-body">
     <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="0">
     <input type="hidden" name="back_month" value="<?= e($monthKey) ?>"><input type="hidden" name="back_page" value="<?= $page ?>">
-    <div class="alert alert-info small py-2" data-assembly-hint hidden>Dieser Termin kommt vom Antreten. Datum, Uhrzeit und Ort änderst du auf der <a href="/antreten.php">Antreten-Seite</a>.</div>
+    <div class="alert alert-info small py-2" data-assembly-hint hidden>Dieser Termin kommt vom Antreten und gehört fest zur Kategorie Kirmes. Datum, Uhrzeit und Ort änderst du auf der <a href="/antreten.php">Antreten-Seite</a>.</div>
     <div class="row g-2">
       <div class="col-12" data-free><label class="form-label small" for="calTitle">Name des Termins</label><input class="form-control" id="calTitle" name="title" maxlength="160" required placeholder="z. B. Kirmesumzug"></div>
-      <div class="col-12"><span class="form-label small d-block">Kategorie</span>
+      <div class="col-12" data-free><span class="form-label small d-block">Kategorie</span>
         <div class="cal-cat-picker">
           <?php foreach (CALENDAR_CATEGORIES as $cat => $info): ?>
             <label class="cal-cat-option" style="<?= e($chipStyle($cat)) ?>"><input type="radio" name="category" value="<?= e($cat) ?>" required><span><?= e($info['label']) ?></span></label>
@@ -231,6 +245,36 @@ require __DIR__ . '/includes/header.php';
 <form method="post" id="calDeleteForm" hidden><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="0"><input type="hidden" name="back_month" value="<?= e($monthKey) ?>"><input type="hidden" name="back_page" value="<?= $page ?>"></form>
 <?php endif; ?>
 
+<!-- Popup: Kalender abonnieren -->
+<div class="modal fade" id="calFeedModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+  <div class="modal-header"><h2 class="h5 mb-0">Kalender aufs Handy</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button></div>
+  <div class="modal-body">
+    <p>Mit einem Abo erscheinen alle Termine im Kalender deines Handys oder Computers. Neue, geänderte und gelöschte Termine kommen automatisch nach – je nach Gerät nach einigen Minuten bis wenigen Stunden.</p>
+    <p class="small text-secondary">Das Abo ist nur zum Ansehen. Eintragen und Ändern geht ausschließlich hier auf der Webseite.</p>
+    <?php if (!$feedUrl): ?>
+      <form method="post"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="action" value="feed_create"><input type="hidden" name="back_month" value="<?= e($monthKey) ?>"><input type="hidden" name="back_page" value="<?= $page ?>">
+        <button class="btn btn-brand"><i class="bi bi-link-45deg me-1"></i> Meinen Abo-Link erstellen</button></form>
+    <?php else: ?>
+      <h3 class="h6 mt-3"><i class="bi bi-apple me-1"></i> iPhone, iPad, Mac</h3>
+      <a class="btn btn-brand mb-1" href="<?= e($feedWebcal) ?>"><i class="bi bi-calendar-plus me-1"></i> Jetzt abonnieren</a>
+      <p class="small text-secondary">Antippen und „Abonnieren“ bestätigen. Tipp: Unter Einstellungen → Kalender → Accounts → Abonnierte Kalender → „Abrufen“ auf „Stündlich“ stellen.</p>
+      <h3 class="h6 mt-3"><i class="bi bi-android2 me-1"></i> Android / Google Kalender</h3>
+      <ol class="small ps-3 mb-2">
+        <li>Link unten kopieren.</li>
+        <li>Am Computer oder im Handy-Browser <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Kalender → „Per URL hinzufügen“</a> öffnen und den Link einfügen.</li>
+        <li>In der Kalender-App unter Einstellungen den Kalender „Strahlemännkes“ einblenden und „Synchronisieren“ einschalten.</li>
+      </ol>
+      <p class="small text-secondary">Google holt Änderungen selbst ab, das kann einige Stunden dauern.</p>
+      <h3 class="h6 mt-3"><i class="bi bi-link-45deg me-1"></i> Dein persönlicher Link</h3>
+      <div class="input-group mb-2"><input class="form-control form-control-sm" id="calFeedUrl" value="<?= e($feedUrl) ?>" readonly><button type="button" class="btn btn-outline-secondary btn-sm" id="calFeedCopy"><i class="bi bi-clipboard me-1"></i> Kopieren</button></div>
+      <p class="small text-secondary mb-2">Bitte nicht weitergeben – der Link gehört nur dir. Wenn er in falsche Hände geraten ist, erneuere ihn; der alte funktioniert dann nicht mehr.</p>
+      <form method="post" onsubmit="return confirm('Neuen Link erstellen? Bestehende Abos auf deinen Geräten hören dann auf, sich zu aktualisieren, und müssen neu eingerichtet werden.');"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="action" value="feed_renew"><input type="hidden" name="back_month" value="<?= e($monthKey) ?>"><input type="hidden" name="back_page" value="<?= $page ?>">
+        <button class="btn btn-outline-danger btn-sm"><i class="bi bi-arrow-repeat me-1"></i> Link erneuern</button></form>
+    <?php endif; ?>
+  </div>
+  <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Schließen</button></div>
+</div></div></div>
+
 <script>
 (() => {
   const entries = <?= json_encode($entryData ?: new stdClass, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
@@ -238,7 +282,7 @@ require __DIR__ . '/includes/header.php';
   const cats = <?= json_encode(CALENDAR_CATEGORIES, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   const canEdit = <?= $canEdit ? 'true' : 'false' ?>;
   // Popups ans Ende von <body> hängen, sonst liegen sie unter der Kopfleiste (main hat einen eigenen Stapelkontext).
-  ['calShowModal', 'calEditModal'].forEach(id => { const m = document.getElementById(id); if (m) document.body.append(m); });
+  ['calShowModal', 'calEditModal', 'calFeedModal'].forEach(id => { const m = document.getElementById(id); if (m) document.body.append(m); });
   const showEl = document.getElementById('calShowModal');
   const showModal = () => bootstrap.Modal.getOrCreateInstance(showEl);
   const title = document.getElementById('calShowTitle'), body = document.getElementById('calShowBody'), footer = document.getElementById('calShowFooter');
@@ -309,6 +353,14 @@ require __DIR__ . '/includes/header.php';
     c.addEventListener('click', () => showDay(c.dataset.calDay));
     c.addEventListener('keydown', ev => { if (ev.target === c && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); showDay(c.dataset.calDay); } });
   });
+  const copy = document.getElementById('calFeedCopy');
+  if (copy) copy.addEventListener('click', async () => {
+    const input = document.getElementById('calFeedUrl');
+    try { await navigator.clipboard.writeText(input.value); } catch (e) { input.select(); document.execCommand('copy'); }
+    copy.innerHTML = '<i class="bi bi-check-lg me-1"></i> Kopiert';
+  });
+  <?php if ($openFeed): ?>document.addEventListener('DOMContentLoaded', () => bootstrap.Modal.getOrCreateInstance(document.getElementById('calFeedModal')).show());<?php endif; ?>
+
   document.querySelectorAll('[data-cal-new]').forEach(b => b.addEventListener('click', () => openForm(null, b.dataset.calNew)));
   const endInput = document.getElementById('calEnd');
   if (endInput) document.getElementById('calEditForm').addEventListener('submit', ev => {

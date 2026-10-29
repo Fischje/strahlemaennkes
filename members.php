@@ -73,6 +73,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $pdo->prepare('UPDATE users SET is_active=1-is_active WHERE id=?')->execute([$id]);
         // Deaktivierte Mitglieder verlieren gespeicherte Anmeldungen sofort (die laufende Sitzung endet beim nächsten Seitenaufruf).
         $pdo->prepare('DELETE FROM remember_tokens WHERE user_id=? AND EXISTS(SELECT 1 FROM users WHERE id=? AND is_active=0)')->execute([$id,$id]);
+        $pdo->prepare('DELETE FROM calendar_feed_tokens WHERE user_id=? AND EXISTS(SELECT 1 FROM users WHERE id=? AND is_active=0)')->execute([$id,$id]);
         flash('success','Benutzerstatus geändert.');
         redirect('/members.php');
     }

@@ -387,6 +387,7 @@ function app_maintenance(PDO $pdo): void {
     $pdo->exec('DELETE FROM password_reset_tokens WHERE used_at IS NOT NULL OR expires_at <= CURRENT_TIMESTAMP');
     $pdo->exec("DELETE FROM login_attempts WHERE attempted_at < CURRENT_TIMESTAMP - INTERVAL '1 day'");
     $pdo->exec("DELETE FROM domain_handoff_tokens WHERE expires_at < CURRENT_TIMESTAMP - INTERVAL '1 day'");
+    $pdo->exec('DELETE FROM calendar_feed_tokens t USING users u WHERE u.id=t.user_id AND u.is_active=0');
 }
 
 /** Gemeinsame Daten für die Live-Bestellung (Theke und Runde holen). */
@@ -644,6 +645,11 @@ function enforce_domain_move(): void {
     $script = (string)($_SERVER['SCRIPT_NAME'] ?? '');
     if (in_array($script, ['/umzug.php', '/background.php'], true)) return;
     header('Cache-Control: no-store');
+    if ($script === '/calendar-feed.php') {
+        // Kalender-Abos von der alten Adresse dauerhaft auf die neue umleiten, damit sie weiterlaufen.
+        header('Location: ' . absolute_url('/calendar-feed.php?' . (string)($_SERVER['QUERY_STRING'] ?? '')), true, 301);
+        exit;
+    }
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && !str_contains((string)($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json')) {
         redirect('/umzug.php');
     }
