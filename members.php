@@ -84,8 +84,8 @@ $pageTitle='Mitglieder';
 require __DIR__.'/includes/header.php';
 ?>
 <div class="container dashboard-shell"><div class="row g-4">
-<?php require __DIR__.'/includes/sidebar.php';?>
-<section class="col-lg-9">
+
+<section class="col-12">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <div>
       <div class="eyebrow">Zugmitglieder</div>

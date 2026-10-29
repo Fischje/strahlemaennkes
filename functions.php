@@ -8,8 +8,8 @@ $pageTitle='Funktionen';
 require __DIR__.'/includes/header.php';
 ?>
 <div class="container dashboard-shell"><div class="row g-4">
-<?php require __DIR__.'/includes/sidebar.php';?>
-<section class="col-lg-9">
+
+<section class="col-12">
   <div class="eyebrow">Werkzeuge</div>
   <h1 class="section-title h2 mb-1">Funktionen</h1>
   <p class="text-secondary mb-4">Hier findest du die zusätzlichen Funktionen, für die du berechtigt bist.</p>

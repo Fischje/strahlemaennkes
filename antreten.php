@@ -40,8 +40,8 @@ $current=active_assembly($pdo); $formDate=$formTime=$formLocation=$formAttire=''
 if($raw){try{$dt=(new DateTimeImmutable($raw['starts_at_utc'],new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Berlin'));$formDate=$dt->format('Y-m-d');$formTime=$dt->format('H:i');$formLocation=$raw['location']??'';$formAttire=$raw['attire'];}catch(Throwable $e){}}
 $pageTitle='Antreten'; require __DIR__.'/includes/header.php';
 ?>
-<div class="container dashboard-shell"><div class="row g-4"><?php require __DIR__.'/includes/sidebar.php';?>
-<section class="col-lg-9">
+<div class="container dashboard-shell"><div class="row g-4">
+<section class="col-12">
 <div class="mb-4"><div class="eyebrow">Nächster Termin</div><h1 class="section-title h2 mb-1">Antreten</h1><p class="text-secondary mb-0"><?= $canManage ? 'Hier kannst du den nächsten Antreten-Termin festlegen oder ändern.' : 'Hier findest du alle Informationen zum nächsten Antreten.' ?></p></div>
 <?php if($current):?><div class="panel p-4 mb-4 assembly-current-card"><div class="small text-secondary">Aktuell angezeigt</div><div class="h4 fw-bold mb-1"><?=e($current['weekday_short'].', '.$current['display_date'].' · '.$current['display_time'].' Uhr')?></div><div><strong>Ort:</strong> <?=e($current['location'])?></div><div><strong>Anzug:</strong> <?=e($current['attire'])?></div><div class="small text-secondary mt-2">Verschwindet automatisch eine Stunde nach dem Antreten. Steht auch im <a href="/calendar.php">Kalender</a>.</div></div><?php else:?><?php if(!$canManage):?><div class="panel p-4 mb-4"><div class="h5 fw-bold mb-1">Aktuell kein Antreten eingetragen</div><div class="text-secondary">Sobald der Zugführer einen Termin festlegt, wird er hier angezeigt.</div></div><?php endif;?><?php endif;?>
 <?php if($canManage):?>

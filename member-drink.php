@@ -77,8 +77,8 @@ require __DIR__.'/includes/header.php';
 ?>
 <div class="container dashboard-shell">
   <div class="row g-4">
-    <?php require __DIR__.'/includes/sidebar.php'; ?>
-    <section class="col-lg-9">
+    
+    <section class="col-12">
       <?php require __DIR__.'/includes/active-round-widget.php'; ?>
       <div class="mb-4"><div class="eyebrow">Getränkestatus</div><h1 class="section-title h2">Mein Getränk</h1><p class="text-secondary mb-0">Deine Auswahl bleibt gespeichert, bis du sie änderst. Mit dem Stern markierst du Favoriten – sie stehen automatisch ganz oben.</p></div>
 

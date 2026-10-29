@@ -92,8 +92,8 @@ require __DIR__.'/includes/header.php';
 ?>
 <div class="container dashboard-shell">
   <div class="row g-4">
-    <?php require __DIR__.'/includes/sidebar.php'; ?>
-    <section class="col-lg-9">
+    
+    <section class="col-12">
       <div class="mb-4">
         <div class="eyebrow">Vertretung</div>
         <h1 class="section-title h2 mb-1">Spieß-Vertretung</h1>

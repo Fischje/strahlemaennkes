@@ -2,11 +2,13 @@
 </main>
 <?php if($footerUser): ?>
 <nav class="mobile-bottom-nav d-lg-none" aria-label="App-Navigation">
-  <a href="/dashboard.php" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', 'dashboard.php') ? 'active' : '' ?>"><i class="bi bi-house-door"></i><span>Start</span></a>
-  <a href="/stammtisch.php" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', 'stammtisch.php') ? 'active' : '' ?>"><i class="bi bi-calendar2-check"></i><span>Stammtisch</span></a>
-  <a href="/member-drink.php" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', 'member-drink.php') ? 'active' : '' ?>"><i class="bi bi-cup-straw"></i><span>Getränk</span></a>
-  <a href="/fines.php" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', 'fines.php') ? 'active' : '' ?>"><i class="bi bi-receipt"></i><span>Runden</span></a>
-  <a href="/theke.php" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', 'theke.php') ? 'active' : '' ?>"><i class="bi bi-list-check"></i><span>Theke</span></a>
+<?php
+  // Feste Schnellwahl am Handy/in der App; alles Weitere steht im Menü oben.
+  $bottomPath=parse_url($_SERVER['REQUEST_URI'] ?? '/',PHP_URL_PATH) ?: '/';
+  foreach([['/dashboard.php','bi-house-door','Übersicht'],['/member-drink.php','bi-cup-straw','Mein Getränk'],['/theke.php','bi-list-check','Theke'],['/calendar.php','bi-calendar-event','Kalender']] as [$href,$icon,$label]):
+    $here=$bottomPath===$href; ?>
+  <a href="<?= $href ?>" class="<?= $here ? 'active' : '' ?>" <?= $here ? 'aria-current="page"' : '' ?>><i class="bi <?= $icon ?>"></i><span><?= $label ?></span></a>
+<?php endforeach; ?>
 </nav>
 <?php endif; ?>
 <?php if(empty($hidePwaInstall)): ?><button type="button" class="btn btn-brand pwa-install-button" data-pwa-install hidden aria-label="Strahlemännkes als App installieren"><i class="bi bi-download me-1"></i> App installieren</button><?php endif; ?>

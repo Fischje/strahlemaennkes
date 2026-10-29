@@ -74,7 +74,7 @@ $registrationEnabled=public_registration_enabled($pdo);
 $bgInfo=$pdo->query('SELECT width,height,updated_at,LENGTH(data) AS bytes FROM site_background WHERE id=1')->fetch();
 $pageTitle='Funktionen';require __DIR__.'/includes/header.php';
 ?>
-<div class="container dashboard-shell"><div class="row g-4"><?php require __DIR__.'/includes/sidebar.php';?><section class="col-lg-9">
+<div class="container dashboard-shell"><div class="row g-4"><section class="col-12">
 <div class="eyebrow">Administration</div><h1 class="section-title h2">Funktionen freischalten</h1>
 <?php if(domain_move_active()):
  $lp=[];$legacyCond=legacy_push_condition($lp);

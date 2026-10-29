@@ -141,8 +141,8 @@ $openFeed = isset($_GET['abo']);
 $pageTitle = 'Kalender';
 require __DIR__ . '/includes/header.php';
 ?>
-<div class="container dashboard-shell"><div class="row g-4"><?php require __DIR__ . '/includes/sidebar.php'; ?>
-<section class="col-lg-9">
+<div class="container dashboard-shell"><div class="row g-4">
+<section class="col-12">
   <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
     <div><div class="eyebrow">Termine des Zuges</div><h1 class="section-title h2 mb-1">Kalender</h1>
       <p class="text-secondary mb-0">Antreten und festgelegte Stammtische erscheinen automatisch.</p></div>

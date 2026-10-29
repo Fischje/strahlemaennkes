@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.36 – 29.10.2026
+
+- Nur noch ein Menü: Die Seitenleiste links entfällt, alles steht im gruppierten Menü oben. Die Seiten nutzen dadurch die volle Breite.
+- Handy und App: Die Leiste unten zeigt jetzt Übersicht, Mein Getränk, Theke und Kalender.
+
 ## Beta 0.7.35 – 29.10.2026
 
 - Antreten: Dieselben Beispiele bei Ort und Kleidung wie im Kalender.

@@ -36,7 +36,7 @@ $active=sektbar_is_active($pdo);
 $drinks=$pdo->query("SELECT name,emoji,is_active FROM drinks WHERE is_sektbar=1 AND is_approved=1 ORDER BY sort_order,name")->fetchAll();
 $pageTitle='Sektbar';require __DIR__.'/includes/header.php';
 ?>
-<div class="container dashboard-shell"><div class="row g-4"><?php require __DIR__.'/includes/sidebar.php';?><section class="col-lg-9">
+<div class="container dashboard-shell"><div class="row g-4"><section class="col-12">
 <div class="eyebrow">Spezialmodus</div><h1 class="section-title h2">Sektbar</h1>
 <div class="panel p-4 text-center sektbar-control">
 <?php if(!$enabled):?>
