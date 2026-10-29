@@ -292,11 +292,12 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .cal-chip-time { font-weight:700; }
 .cal-more { font-size:.7rem; color:var(--sm-muted); padding-left:2px; }
 .cal-badge { display:inline-block; border-radius:999px; padding:.15rem .6rem; font-size:.75rem; font-weight:600; background:var(--cal-c); color:var(--cal-t); }
-/* Handy: Einträge als farbige Balken, Antippen des Tages zeigt die Details */
+/* Handy: Einträge als schmale Farbstreifen mit den Anfangsbuchstaben (ohne Uhrzeit); Antippen des Tages zeigt die Details */
 @media (max-width:575.98px){
   .cal-panel { padding-left:.5rem !important; padding-right:.5rem !important; }
-  .cal-day { min-height:64px; padding:2px; }
-  .cal-chip { height:6px; padding:0; font-size:0; pointer-events:none; }
+  .cal-day { min-height:64px; padding:2px 1px; }
+  .cal-chip { font-size:.58rem; line-height:1.25; padding:0 2px; border-radius:2px; text-overflow:clip; font-weight:600; letter-spacing:-.01em; pointer-events:none; }
+  .cal-chip-time { display:none; }
   .cal-more { font-size:.62rem; line-height:1; }
   .cal-num { align-self:center; font-size:.75rem; }
 }

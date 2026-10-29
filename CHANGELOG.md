@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.40 – 29.10.2026
+
+- Kalender am Handy: Statt nur eines Farbstreifens stehen jetzt die Anfangsbuchstaben jedes Termins im Tag, damit man sofort sieht, was ansteht.
+
 ## Beta 0.7.39 – 29.10.2026
 
 - Freischaltungen aufgeräumt: Der Hinweis auf die Bilder entfällt, sie stehen unter Funktionen → Bilder der Seite.
