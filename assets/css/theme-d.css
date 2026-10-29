@@ -318,3 +318,30 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .cal-cat-option input:checked + span { opacity:1; border-color:var(--sm-text); }
 .cal-cat-option input:checked + span::before { content:"\2713"; }
 .cal-cat-option input:focus-visible + span { outline:2px solid var(--sm-red); outline-offset:2px; }
+
+/* Hauptmenü in Gruppen (0.7.30): Termine, Getränke, Info, Funktionen mit Untermenüs */
+.app-navbar .nav-group-toggle { background:none; border:0; width:100%; text-align:left; align-items:center; }
+.app-navbar .nav-group-link, .app-navbar .nav-group-toggle { align-items:center; gap:.3rem; }
+.nav-group-caret { font-size:.65em; opacity:.7; transition:transform .15s ease; }
+.nav-group-toggle[aria-expanded="true"] .nav-group-caret { transform:rotate(180deg); }
+.nav-group-menu { min-width:12rem; }
+.nav-group-menu .dropdown-item { border-radius:var(--sm-radius); font-weight:500; }
+.nav-group-menu .dropdown-item i { color:var(--sm-muted); }
+.nav-group-menu .dropdown-item.active, .nav-group-menu .dropdown-item:active { background:var(--sm-surface-2); color:var(--sm-red); font-weight:600; }
+.nav-group-menu .dropdown-item.active i { color:var(--sm-red); }
+@media (min-width:992px){
+  .nav-group { position:relative; }
+  .nav-group > .nav-group-menu { margin-top:0; padding:.35rem; }
+  /* Unsichtbare Brücke, damit das Menü beim Runterfahren mit der Maus offen bleibt */
+  .nav-group > .nav-group-menu::before { content:""; position:absolute; left:0; right:0; top:-12px; height:12px; }
+  .nav-group:hover > .nav-group-menu, .nav-group:has(> .nav-group-link:focus-visible) > .nav-group-menu { display:block; }
+  .nav-group:hover .nav-group-caret { transform:rotate(180deg); }
+}
+@media (max-width:991.98px){
+  .nav-group-menu { border:0; box-shadow:none; background:transparent; padding:0 0 .25rem 1rem; margin:0; }
+}
+.app-navbar .nav-link.active:hover, .app-navbar .nav-link.active:focus, .app-navbar .nav-link.active[aria-expanded="true"] { color:#fff !important; background:var(--sm-text); }
+.app-navbar .nav-group-menu .dropdown-item { color:var(--sm-text) !important; }
+.app-navbar .nav-group-menu .dropdown-item:hover, .app-navbar .nav-group-menu .dropdown-item:focus { background:var(--sm-surface-2); }
+.app-navbar .nav-group-menu .dropdown-item.active { color:var(--sm-red) !important; }
+@media (max-width:991.98px){ .app-navbar .nav-link.active { padding-left:.6rem; padding-right:.6rem; } }

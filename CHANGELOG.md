@@ -1,5 +1,14 @@
 # Changelog
 
+## Beta 0.7.30 – 29.10.2026
+
+- Aufgeräumtes Menü oben: Die Punkte sind jetzt in Gruppen zusammengefasst, damit die Leiste nicht mehr zu breit wird.
+- „Termine“ enthält Kalender, Stammtisch und Antreten.
+- „Getränke“ öffnet beim Klick „Mein Getränk“; beim Drüberfahren erscheinen zusätzlich Theke und Runden.
+- „Info“ enthält Chronik, Protokolle, Mitglieder und Kasse.
+- „Funktionen“ öffnet wie bisher die Funktionen-Seite und zeigt beim Drüberfahren alle Funktionen, für die du berechtigt bist.
+- Am Handy klappen die Gruppen im Menü per Tipp auf.
+
 ## Beta 0.7.29 – 29.10.2026
 
 - Kalender aufs Handy: Jedes Mitglied kann den Kalender über „Aufs Handy abonnieren“ in den Kalender von iPhone, Android (Google Kalender) oder Computer übernehmen. Neue, geänderte und gelöschte Termine kommen automatisch nach.

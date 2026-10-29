@@ -63,24 +63,50 @@ header('Pragma: no-cache');
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1 py-2 py-lg-0">
         <?php if($u): ?>
-          <li class="nav-item"><a class="nav-link" href="/dashboard.php">Übersicht</a></li>
-          <li class="nav-item"><a class="nav-link" href="/member-drink.php">Mein Getränk</a></li>
-          <li class="nav-item"><a class="nav-link" href="/stammtisch.php">Stammtisch</a></li>
-          <li class="nav-item"><a class="nav-link" href="/calendar.php">Kalender</a></li>
-          <li class="nav-item"><a class="nav-link" href="/fines.php">Runden</a></li>
-          <li class="nav-item"><a class="nav-link" href="/theke.php">Theke</a></li>
-          <li class="nav-item"><a class="nav-link" href="/protokolle.php">Protokolle</a></li>
-          <li class="nav-item"><a class="nav-link" href="/antreten.php">Antreten</a></li>
-          <li class="nav-item"><a class="nav-link" href="/public/chronik.php">Chronik</a></li>
-          <li class="nav-item"><a class="nav-link" href="/members.php">Mitglieder</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cash.php">Kasse</a></li>
           <?php
-            $showFunctions = can_act_as_spiess($pdo,$u) || can_manage_spiess_delegation()
-              || can_manage_assembly() || can_edit_chronicle() || has_role('admin') || sektbar_is_enabled($pdo);
+            // Hauptmenü in Gruppen. 'href' = Gruppe ist selbst ein Link (Klick öffnet die Seite, Untermenü per Maus);
+            // ohne 'href' öffnet ein Klick das Untermenü. Am Handy klappt jede Gruppe per Tipp auf.
+            $navGroups=[
+              ['label'=>'Termine','icon'=>'bi-calendar-event','items'=>[
+                ['/calendar.php','bi-calendar-event','Kalender'],
+                ['/stammtisch.php','bi-calendar2-check','Stammtisch'],
+                ['/antreten.php','bi-clock','Antreten'],
+              ]],
+              ['label'=>'Getränke','icon'=>'bi-cup-straw','href'=>'/member-drink.php','items'=>[
+                ['/member-drink.php','bi-cup-straw','Mein Getränk'],
+                ['/theke.php','bi-list-check','Theke'],
+                ['/fines.php','bi-receipt','Runden'],
+              ]],
+              ['label'=>'Info','icon'=>'bi-info-circle','items'=>[
+                ['/public/chronik.php','bi-book','Chronik'],
+                ['/protokolle.php','bi-journal-text','Protokolle'],
+                ['/members.php','bi-people','Mitglieder'],
+                ['/cash.php','bi-cash-coin','Kasse'],
+              ]],
+            ];
+            $functionItems=function_menu_items($pdo,$u);
+            if($functionItems){
+              $navGroups[]=['label'=>'Funktionen','icon'=>'bi-grid-3x3-gap','href'=>'/functions.php','items'=>array_merge(
+                [['/functions.php','bi-grid-3x3-gap','Alle Funktionen']],
+                array_map(fn($f)=>[$f[0],$f[1],$f[2]],$functionItems)
+              )];
+            }
           ?>
-          <?php if($showFunctions): ?>
-            <li class="nav-item"><a class="nav-link functions-nav-link" href="/functions.php"><i class="bi bi-grid-3x3-gap me-1"></i>Funktionen</a></li>
-          <?php endif; ?>
+          <li class="nav-item"><a class="nav-link <?= $currentPath==='/dashboard.php'?'active':'' ?>" href="/dashboard.php" <?= $currentPath==='/dashboard.php'?'aria-current="page"':'' ?>>Übersicht</a></li>
+          <?php foreach($navGroups as $gi=>$g):
+            $groupActive=in_array($currentPath,array_column($g['items'],0),true); ?>
+            <li class="nav-item dropdown nav-group">
+              <?php if(!empty($g['href'])): ?>
+                <a class="nav-link nav-group-link d-none d-lg-flex <?= $groupActive?'active':'' ?>" href="<?= e($g['href']) ?>" aria-haspopup="true"><?= e($g['label']) ?><i class="bi bi-chevron-down nav-group-caret"></i></a>
+              <?php endif; ?>
+              <button type="button" class="nav-link nav-group-toggle <?= !empty($g['href'])?'d-lg-none':'d-flex' ?> <?= $groupActive?'active':'' ?>" data-bs-toggle="dropdown" aria-expanded="false"><?= e($g['label']) ?><i class="bi bi-chevron-down nav-group-caret"></i></button>
+              <ul class="dropdown-menu nav-group-menu">
+                <?php foreach($g['items'] as [$href,$icon,$label]): $here=$currentPath===$href; ?>
+                  <li><a class="dropdown-item <?= $here?'active':'' ?>" href="<?= e($href) ?>" <?= $here?'aria-current="page"':'' ?>><i class="bi <?= e($icon) ?> me-2"></i><?= e($label) ?></a></li>
+                <?php endforeach; ?>
+              </ul>
+            </li>
+          <?php endforeach; ?>
           <li class="nav-item dropdown ms-lg-2 d-none d-lg-block">
             <button class="btn btn-light btn-sm px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-person-circle me-1"></i><?=e($u['first_name'])?>

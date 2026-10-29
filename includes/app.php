@@ -206,6 +206,24 @@ function can_manage_spiess_delegation(): bool {
     return has_role('spiess','admin');
 }
 
+/** Zusatzfunktionen, für die das Mitglied berechtigt ist: [Link, Icon, Titel, Beschreibung]. Genutzt von functions.php und dem Menü „Funktionen“. */
+function function_menu_items(PDO $pdo, array $u): array {
+    $items=[];
+    if(can_create_meetings($pdo,$u)) $items[]=['/stammtisch.php','bi-calendar2-plus','Terminfindung starten','Neuen Stammtisch mit Terminoptionen anlegen.'];
+    if(can_act_as_spiess($pdo,$u)) $items[]=['/drinks.php','bi-sliders','Getränke verwalten','Getränke bearbeiten, freigeben und für die Sektbar kennzeichnen.'];
+    if(has_role('admin') || sektbar_is_enabled($pdo)) {
+        $sektText=sektbar_is_active($pdo) ? 'Sektbarmodus ist aktuell aktiv.' : (sektbar_is_enabled($pdo) ? 'Sektbar öffnen und Status ansehen.' : 'Sektbar ist noch nicht freigeschaltet.');
+        $items[]=['/sektbar.php','bi-stars','Sektbar',$sektText];
+    }
+    if(can_manage_spiess_delegation()) $items[]=['/spiess-vertretung.php','bi-person-badge','Spieß-Vertretung','Vertretung einsetzen oder wieder beenden.'];
+    if(can_manage_assembly()) $items[]=['/antreten.php','bi-clock','Antreten festlegen','Nächsten Termin, Treffpunkt und Kleidung festlegen.'];
+    if(can_edit_chronicle()) $items[]=['/chronik-admin.php','bi-pencil-square','Chronik verwalten','Einträge der Zug-Chronik bearbeiten und veröffentlichen.'];
+    if(can_view_kirmes($pdo,$u)) $items[]=['/kirmes.php','bi-calendar-event','Kirmes-Planung','Tage mit Antreten, Kleidung und Mitbringsel.'];
+    if(can_view_stats($pdo,$u)) $items[]=['/statistik.php','bi-bar-chart','Anwesenheitsstatistik','Wer war wie oft beim Stammtisch?'];
+    if(has_role('admin')) $items[]=['/admin-features.php','bi-toggles','Freischaltungen','Registrierung und optionale Funktionen zentral freischalten.'];
+    return $items;
+}
+
 function app_setting(PDO $pdo, string $key, ?string $default=null): ?string {
     $st=$pdo->prepare('SELECT setting_value FROM app_settings WHERE setting_key=? LIMIT 1');
     $st->execute([$key]);
