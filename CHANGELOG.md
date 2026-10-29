@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.39 – 29.10.2026
+
+- Freischaltungen aufgeräumt: Der Hinweis auf die Bilder entfällt, sie stehen unter Funktionen → Bilder der Seite.
+
 ## Beta 0.7.38 – 29.10.2026
 
 - Neu unter Funktionen: „Bilder der Seite“ mit dem Hintergrund-Muster und dem Gruppenfoto der Chronik.
