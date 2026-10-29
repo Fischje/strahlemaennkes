@@ -14,38 +14,57 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   else flash('success','Umzugs-Erinnerung an '.(int)$r['sent'].' Gerät(e) auf der alten Adresse geschickt'.($r['expired_removed']?' ('.(int)$r['expired_removed'].' veraltete Geräte entfernt)':'').'.');
   redirect('/admin-features.php');
  }
- if(($_POST['action']??'')==='background_remove'){
-  $pdo->exec('DELETE FROM site_background WHERE id=1');
-  flash('success','Hintergrundbild entfernt.');
-  redirect('/admin-features.php');
+ if(($_POST['action']??'')==='background_delete'){
+  $pdo->prepare('DELETE FROM site_backgrounds WHERE id=?')->execute([(int)($_POST['id']??0)]);
+  flash('success','Hintergrundbild gelöscht.');
+  redirect('/admin-features.php#hintergrund');
+ }
+ if(($_POST['action']??'')==='background_toggle'){
+  $on=!empty($_POST['active']);
+  $pdo->prepare('UPDATE site_backgrounds SET is_active=? WHERE id=?')->execute([$on?1:0,(int)($_POST['id']??0)]);
+  flash('success',$on?'Bild wird jetzt im Wechsel angezeigt.':'Bild wird nicht mehr angezeigt.');
+  redirect('/admin-features.php#hintergrund');
  }
  if(($_POST['action']??'')==='background_upload'){
-  try{
-   $f=$_FILES['background']??null;
-   if(!$f||$f['error']===UPLOAD_ERR_NO_FILE) throw new RuntimeException('Bitte ein Bild auswählen.');
-   if($f['error']===UPLOAD_ERR_INI_SIZE||$f['error']===UPLOAD_ERR_FORM_SIZE) throw new RuntimeException('Das Bild ist zu groß für den Server (Limit upload_max_filesize). Bitte unter ca. 8 MB bleiben.');
-   if($f['error']!==UPLOAD_ERR_OK) throw new RuntimeException('Upload fehlgeschlagen (Fehlercode '.(int)$f['error'].').');
-   if($f['size']>12*1024*1024) throw new RuntimeException('Das Bild ist größer als 12 MB.');
-   $raw=file_get_contents($f['tmp_name']);
-   $info=$raw===false?false:@getimagesizefromstring($raw);
-   if(!$info||!in_array($info[2],[IMAGETYPE_JPEG,IMAGETYPE_PNG,IMAGETYPE_WEBP],true)) throw new RuntimeException('Bitte ein JPG-, PNG- oder WebP-Bild hochladen.');
-   [$w,$h]=$info;
-   $img=@imagecreatefromstring($raw);
-   if(!$img) throw new RuntimeException('Das Bild konnte nicht gelesen werden.');
-   if($w>2560){
-    $nh=(int)round($h*2560/$w);
-    $scaled=imagescale($img,2560,$nh,IMG_BICUBIC);
-    if($scaled){imagedestroy($img);$img=$scaled;$w=2560;$h=$nh;}
-   }
-   ob_start();imagejpeg($img,null,82);$jpeg=(string)ob_get_clean();imagedestroy($img);
-   if($jpeg==='') throw new RuntimeException('Das Bild konnte nicht verarbeitet werden.');
-   $stream=fopen('php://memory','r+');fwrite($stream,$jpeg);rewind($stream);
-   $st=$pdo->prepare('INSERT INTO site_background(id,mime,data,width,height,updated_at,updated_by) VALUES(1,?,?,?,?,CURRENT_TIMESTAMP,?) ON CONFLICT(id) DO UPDATE SET mime=EXCLUDED.mime,data=EXCLUDED.data,width=EXCLUDED.width,height=EXCLUDED.height,updated_at=CURRENT_TIMESTAMP,updated_by=EXCLUDED.updated_by');
-   $st->bindValue(1,'image/jpeg');$st->bindValue(2,$stream,PDO::PARAM_LOB);$st->bindValue(3,$w,PDO::PARAM_INT);$st->bindValue(4,$h,PDO::PARAM_INT);$st->bindValue(5,(int)$u['id'],PDO::PARAM_INT);
-   $st->execute();
-   flash('success','Hintergrundbild gespeichert ('.$w.'×'.$h.').');
-  }catch(Throwable $e){ flash('danger',user_error_message($e)); }
-  redirect('/admin-features.php');
+  // Mehrere Bilder auf einmal möglich; jedes wird einzeln geprüft, als JPEG gespeichert und gleich angehakt.
+  $files=$_FILES['background']??null;
+  $list=[];
+  if($files && is_array($files['name'])){
+   foreach($files['name'] as $i=>$name) $list[]=['name'=>$name,'tmp_name'=>$files['tmp_name'][$i],'error'=>$files['error'][$i],'size'=>$files['size'][$i]];
+  }
+  $list=array_values(array_filter($list,fn($f)=>$f['error']!==UPLOAD_ERR_NO_FILE));
+  if(!$list){flash('danger','Bitte mindestens ein Bild auswählen.');redirect('/admin-features.php#hintergrund');}
+  $count=(int)$pdo->query('SELECT COUNT(*) FROM site_backgrounds')->fetchColumn();
+  $saved=0;
+  foreach($list as $f){
+   $label='„'.mb_substr((string)$f['name'],0,60).'“';
+   try{
+    if($count>=30) throw new RuntimeException('Es sind schon 30 Bilder gespeichert. Bitte zuerst alte Bilder löschen.');
+    if($f['error']===UPLOAD_ERR_INI_SIZE||$f['error']===UPLOAD_ERR_FORM_SIZE) throw new RuntimeException('zu groß für den Server (Limit upload_max_filesize). Bitte unter ca. 8 MB bleiben.');
+    if($f['error']!==UPLOAD_ERR_OK) throw new RuntimeException('Upload fehlgeschlagen (Fehlercode '.(int)$f['error'].').');
+    if($f['size']>12*1024*1024) throw new RuntimeException('größer als 12 MB.');
+    $raw=file_get_contents($f['tmp_name']);
+    $info=$raw===false?false:@getimagesizefromstring($raw);
+    if(!$info||!in_array($info[2],[IMAGETYPE_JPEG,IMAGETYPE_PNG,IMAGETYPE_WEBP],true)) throw new RuntimeException('kein JPG-, PNG- oder WebP-Bild.');
+    [$w,$h]=$info;
+    $img=@imagecreatefromstring($raw);
+    if(!$img) throw new RuntimeException('konnte nicht gelesen werden.');
+    if($w>2560){
+     $nh=(int)round($h*2560/$w);
+     $scaled=imagescale($img,2560,$nh,IMG_BICUBIC);
+     if($scaled){imagedestroy($img);$img=$scaled;$w=2560;$h=$nh;}
+    }
+    ob_start();imagejpeg($img,null,82);$jpeg=(string)ob_get_clean();imagedestroy($img);
+    if($jpeg==='') throw new RuntimeException('konnte nicht verarbeitet werden.');
+    $stream=fopen('php://memory','r+');fwrite($stream,$jpeg);rewind($stream);
+    $st=$pdo->prepare('INSERT INTO site_backgrounds(mime,data,width,height,is_active,created_by) VALUES(?,?,?,?,1,?)');
+    $st->bindValue(1,'image/jpeg');$st->bindValue(2,$stream,PDO::PARAM_LOB);$st->bindValue(3,$w,PDO::PARAM_INT);$st->bindValue(4,$h,PDO::PARAM_INT);$st->bindValue(5,(int)$u['id'],PDO::PARAM_INT);
+    $st->execute();
+    $saved++;$count++;
+   }catch(Throwable $e){ flash('danger','Bild '.$label.': '.user_error_message($e)); }
+  }
+  if($saved) flash('success',$saved===1?'Hintergrundbild gespeichert.':$saved.' Hintergrundbilder gespeichert.');
+  redirect('/admin-features.php#hintergrund');
  }
  if(($_POST['action']??'')==='toggle_registration'){
   $enabled=!empty($_POST['enabled']);
@@ -71,7 +90,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 }
 $enabled=sektbar_is_enabled($pdo);
 $registrationEnabled=public_registration_enabled($pdo);
-$bgInfo=$pdo->query('SELECT width,height,updated_at,LENGTH(data) AS bytes FROM site_background WHERE id=1')->fetch();
+$bgList=$pdo->query('SELECT id,width,height,is_active,EXTRACT(EPOCH FROM updated_at)::bigint AS ts,LENGTH(data) AS bytes FROM site_backgrounds ORDER BY id')->fetchAll();
+$bgActive=count(array_filter($bgList,fn($b)=>(int)$b['is_active']));
 $pageTitle='Funktionen';require __DIR__.'/includes/header.php';
 ?>
 <div class="container dashboard-shell"><div class="row g-4"><section class="col-12">
@@ -95,7 +115,28 @@ $pageTitle='Funktionen';require __DIR__.'/includes/header.php';
 <form method="post" class="d-inline"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="domain_move_push"><button class="btn btn-brand" <?=$moveGroups['old']?'':'disabled'?> onclick="return confirm('Umzugs-Erinnerung an alle Geräte schicken, die noch auf der alten Adresse sind?')"><i class="bi bi-send me-1"></i>Umzugs-Erinnerung an „Nur alte App“ schicken</button></form>
 <div class="small text-secondary mt-2">Tippt man auf die Mitteilung, öffnet sich die alte App mit der Umzugsseite und bringt das Mitglied angemeldet auf die neue Adresse.</div></div>
 <?php endif; ?>
-<div class="panel p-4 mb-4"><h2 class="h5 mb-1">🖼️ Hintergrundbild</h2><p class="text-secondary">Das Bild scheint hinter der Seite zu 15&nbsp;% durch und wird immer auf die Bildschirmbreite skaliert. Jede Größe ist möglich, JPG, PNG oder WebP, bis ca. 8&nbsp;MB. Sehr große Bilder werden automatisch auf 2560 Pixel Breite verkleinert; kleine Bilder können auf großen Bildschirmen unscharf wirken.</p><?php if($bgInfo):?><div class="d-flex flex-wrap gap-3 align-items-start mb-3"><div style="width:240px;height:135px;background:#0B0C0E;overflow:hidden;border:1px solid var(--sm-border-dark)"><img src="/background.php?v=<?=e(strtotime($bgInfo['updated_at']))?>" alt="Aktuelles Hintergrundbild" style="width:100%;height:100%;object-fit:cover;opacity:.15"></div><div class="small text-secondary">Aktuell: <?=(int)$bgInfo['width']?>×<?=(int)$bgInfo['height']?> Pixel, <?=e(number_format(((int)$bgInfo['bytes'])/1024,0,',','.'))?> KB<br>Vorschau mit 15&nbsp;% Sichtbarkeit.</div></div><?php else:?><p class="small text-secondary">Noch kein Bild hochgeladen. Die Seite zeigt nur das dunkle Grau.</p><?php endif;?><form method="post" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="background_upload"><input class="form-control" style="max-width:360px" type="file" name="background" accept="image/jpeg,image/png,image/webp" required><button class="btn btn-brand"><?=$bgInfo?'Bild austauschen':'Bild hochladen'?></button></form><?php if($bgInfo):?><form method="post" class="mt-2"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="background_remove"><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hintergrundbild entfernen?')">Bild entfernen</button></form><?php endif;?></div>
+<div class="panel p-4 mb-4" id="hintergrund"><h2 class="h5 mb-1">🖼️ Hintergrundbilder</h2>
+<p class="text-secondary">Die Bilder scheinen hinter der Seite zu 15&nbsp;% durch und werden auf die Bildschirmbreite skaliert. Alle angehakten Bilder wechseln sich alle <?= SITE_BACKGROUND_INTERVAL ?>&nbsp;Sekunden mit sanfter Überblendung ab; ist nur eins angehakt, bleibt es stehen. JPG, PNG oder WebP, bis ca. 8&nbsp;MB je Bild, mehrere auf einmal möglich. Sehr große Bilder werden auf 2560 Pixel Breite verkleinert.</p>
+<?php if($bgList):?>
+<div class="small text-secondary mb-2"><?= count($bgList) ?> Bild<?= count($bgList)===1?'':'er' ?>, davon <?= $bgActive ?> angehakt.</div>
+<div class="bg-admin-grid mb-3">
+<?php foreach($bgList as $bg): $on=(int)$bg['is_active']; ?>
+ <div class="bg-admin-item <?= $on?'is-on':'' ?>">
+  <img src="/background.php?id=<?=(int)$bg['id']?>&amp;v=<?=(int)$bg['ts']?>" alt="Hintergrundbild <?=(int)$bg['id']?>" loading="lazy">
+  <div class="small text-secondary px-2 pt-1"><?=(int)$bg['width']?>×<?=(int)$bg['height']?> · <?=e(number_format(((int)$bg['bytes'])/1024,0,',','.'))?> KB</div>
+  <div class="d-flex align-items-center justify-content-between gap-2 p-2">
+   <form method="post" class="m-0"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="background_toggle"><input type="hidden" name="id" value="<?=(int)$bg['id']?>">
+    <label class="form-check m-0"><input class="form-check-input" type="checkbox" name="active" value="1" <?=$on?'checked':''?> onchange="this.form.submit()"> <span class="form-check-label">anzeigen</span></label></form>
+   <form method="post" class="m-0" onsubmit="return confirm('Dieses Bild endgültig löschen?')"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="background_delete"><input type="hidden" name="id" value="<?=(int)$bg['id']?>">
+    <button class="btn btn-sm btn-outline-danger" title="Bild löschen" aria-label="Bild löschen"><i class="bi bi-trash3"></i></button></form>
+  </div>
+ </div>
+<?php endforeach;?>
+</div>
+<?php if(!$bgActive):?><p class="small text-secondary">Kein Bild angehakt – die Seite zeigt nur das dunkle Grau.</p><?php endif;?>
+<?php else:?><p class="small text-secondary">Noch kein Bild hochgeladen. Die Seite zeigt nur das dunkle Grau.</p><?php endif;?>
+<form method="post" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="background_upload"><input class="form-control" style="max-width:360px" type="file" name="background[]" accept="image/jpeg,image/png,image/webp" multiple required><button class="btn btn-brand"><i class="bi bi-upload me-1"></i>Bilder hochladen</button></form>
+</div>
 <div class="panel p-4 mb-4"><div class="d-flex flex-wrap justify-content-between align-items-center gap-3"><div><h2 class="h5 mb-1">📝 Selbstregistrierung neuer Mitglieder</h2><p class="text-secondary mb-0">Wenn aktiviert, erscheint auf der Login-Seite ein Registrierungslink. Neue Accounts werden ausschließlich als normale Mitglieder angelegt.</p></div><form method="post" class="d-flex align-items-center gap-3"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="toggle_registration"><div class="form-check form-switch fs-5 mb-0"><input class="form-check-input" type="checkbox" role="switch" name="enabled" value="1" id="registrationEnabled" <?=$registrationEnabled?'checked':''?> onchange="this.form.submit()"><label class="form-check-label fs-6" for="registrationEnabled"><?=$registrationEnabled?'Aktiv':'Aus'?></label></div></form></div><?php if($registrationEnabled):?><div class="alert alert-success mt-3 mb-0 py-2"><i class="bi bi-person-plus me-1"></i> Registrierung ist aktuell geöffnet.</div><?php else:?><div class="alert alert-secondary mt-3 mb-0 py-2">Registrierung ist aktuell geschlossen.</div><?php endif;?></div>
 <div class="panel p-4"><div class="d-flex flex-wrap justify-content-between gap-3 align-items-center"><div><h2 class="h5 mb-1">🥂 Sektbar-Funktion</h2><p class="text-secondary mb-0">Erst nach Freigabe können Spieß und aktiver Spieß-Vertreter den Sektbarmodus sehen und bedienen.</p></div><span class="badge <?= $enabled?'text-bg-success':'text-bg-secondary' ?> fs-6"><?= $enabled?'Freigeschaltet':'Gesperrt' ?></span></div>
 <form method="post" class="mt-4"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="sektbar_enabled" value="<?=$enabled?'0':'1'?>"><button class="btn <?=$enabled?'btn-outline-danger':'btn-brand'?> btn-lg"><?=$enabled?'Sektbar-Funktion sperren':'Sektbar-Funktion freischalten'?></button></form>

@@ -237,3 +237,31 @@ document.addEventListener('DOMContentLoaded', () => {
   SM.refreshActiveRoundWidgets();
   if(document.querySelector('[data-active-round-widget]')) setInterval(SM.refreshActiveRoundWidgets,5000);
 });
+
+/* Hintergrundbilder im Wechsel (0.7.37): angehakte Bilder blenden alle paar Sekunden weich ineinander über.
+   Das Startbild hängt an der Uhrzeit, damit ein Seitenwechsel nicht auf ein anderes Bild springt. */
+(function(){
+  const cfg = window.SM_BACKGROUNDS;
+  if (!cfg || !Array.isArray(cfg.urls) || cfg.urls.length < 2) return;
+  const urls = cfg.urls, step = Math.max(5, cfg.interval || 30) * 1000;
+  const layers = [0, 1].map(() => { const d = document.createElement('div'); d.className = 'sm-bg-layer'; d.setAttribute('aria-hidden', 'true'); document.body.prepend(d); return d; });
+  let index = Math.floor(Date.now() / step) % urls.length, front = 0;
+  layers[0].style.backgroundImage = 'url("' + urls[index] + '")';
+  layers[0].classList.add('is-on');
+  document.documentElement.classList.add('sm-bg-rotating');
+  const next = () => {
+    const i = Math.floor(Date.now() / step) % urls.length;
+    if (i === index) return;
+    const img = new Image();
+    img.onload = () => {
+      index = i;
+      const back = 1 - front;
+      layers[back].style.backgroundImage = 'url("' + urls[i] + '")';
+      layers[back].classList.add('is-on');
+      layers[front].classList.remove('is-on');
+      front = back;
+    };
+    img.src = urls[i];
+  };
+  setTimeout(() => { next(); setInterval(next, step); }, step - (Date.now() % step) + 50);
+})();

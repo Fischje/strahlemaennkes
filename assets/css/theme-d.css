@@ -345,3 +345,14 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .app-navbar .nav-group-menu .dropdown-item:hover, .app-navbar .nav-group-menu .dropdown-item:focus { background:var(--sm-surface-2); }
 .app-navbar .nav-group-menu .dropdown-item.active { color:var(--sm-red) !important; }
 @media (max-width:991.98px){ .app-navbar .nav-link.active { padding-left:.6rem; padding-right:.6rem; } }
+
+/* Wechselnde Hintergrundbilder (0.7.37): zwei Ebenen, die per Deckkraft überblenden */
+.sm-bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; background-size:100% auto; background-position:center; background-repeat:no-repeat; opacity:0; transition:opacity 2.5s ease; }
+.sm-bg-layer.is-on { opacity:.15; }
+html.sm-bg-rotating body::before { background-image:none; }
+@media (prefers-reduced-motion:reduce){ .sm-bg-layer { transition:none; } }
+.bg-admin-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.75rem; }
+.bg-admin-item { border:1px solid var(--sm-border-dark); border-radius:var(--sm-radius-lg); overflow:hidden; background:#fff; opacity:.6; transition:opacity .15s ease; }
+.bg-admin-item.is-on { opacity:1; border-color:var(--sm-text); }
+.bg-admin-item img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:#0B0C0E; }
+#hintergrund { scroll-margin-top:110px; }

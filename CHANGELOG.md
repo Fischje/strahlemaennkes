@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.37 – 29.10.2026
+
+- Mehrere Hintergrundbilder: Unter Funktionen → Freischaltungen lassen sich jetzt beliebig viele Bilder hochladen, auch mehrere auf einmal.
+- Jedes Bild hat einen Haken „anzeigen“. Alle angehakten Bilder wechseln sich alle 30 Sekunden mit sanfter Überblendung ab.
+- Bilder, die nicht mehr gefallen, lassen sich mit dem Papierkorb löschen.
+
 ## Beta 0.7.36 – 29.10.2026
 
 - Nur noch ein Menü: Die Seitenleiste links entfällt, alles steht im gruppierten Menü oben. Die Seiten nutzen dadurch die volle Breite.

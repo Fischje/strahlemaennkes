@@ -280,17 +280,19 @@ function active_round_for_user(PDO $pdo, int $userId): ?array {
 }
 
 /** Zeitstempel des Hintergrundbilds (null, wenn keines hochgeladen ist). Wird für den Cache-Parameter der Bild-URL genutzt. */
-function site_background_stamp(PDO $pdo): ?int {
-    static $loaded=false, $stamp=null;
-    if(!$loaded){
-        $loaded=true;
+/** Angehakte Hintergrundbilder als Liste von Adressen (mit Versionsstempel für den Browser-Cache). */
+function site_background_urls(PDO $pdo): array {
+    static $urls=null;
+    if($urls===null){
         try{
-            $v=$pdo->query('SELECT EXTRACT(EPOCH FROM updated_at)::bigint FROM site_background WHERE id=1')->fetchColumn();
-            $stamp=$v===false ? null : (int)$v;
-        }catch(Throwable $e){ $stamp=null; }
+            $rows=$pdo->query('SELECT id,EXTRACT(EPOCH FROM updated_at)::bigint AS ts FROM site_backgrounds WHERE is_active=1 ORDER BY id')->fetchAll();
+            $urls=array_map(fn($r)=>'/background.php?id='.(int)$r['id'].'&v='.(int)$r['ts'],$rows);
+        }catch(Throwable $e){ $urls=[]; }
     }
-    return $stamp;
+    return $urls;
 }
+/** Sekunden, nach denen das nächste Hintergrundbild eingeblendet wird. */
+const SITE_BACKGROUND_INTERVAL=30;
 function app_version(): array {
     static $version = null;
     if ($version === null) $version = require __DIR__ . '/version.php';
