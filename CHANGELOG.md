@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.33 – 29.10.2026
+
+- Kalender: Passendere Beispiele in den Feldern Ort, „Was anziehen?“ und „Was mitbringen?“.
+
 ## Beta 0.7.32 – 29.10.2026
 
 - Kalender: Termine haben jetzt zusätzlich die Felder „Was anziehen?“ und „Was mitbringen?“. Sie stehen in den Details, in der Terminliste und im Handy-Kalender-Abo.

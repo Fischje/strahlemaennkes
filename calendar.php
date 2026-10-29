@@ -244,9 +244,9 @@ require __DIR__ . '/includes/header.php';
       <div class="col-6 col-sm-3" data-free><label class="form-label small" for="calStart">Von</label><input type="time" class="form-control" id="calStart" name="start_time"></div>
       <div class="col-6 col-sm-3" data-free><label class="form-label small" for="calEnd">Bis</label><input type="time" class="form-control" id="calEnd" name="end_time"></div>
       <div class="col-12" data-free><small class="text-secondary">Ohne Uhrzeit gilt der Termin als ganztägig.</small></div>
-      <div class="col-12" data-free><label class="form-label small" for="calLocation">Ort</label><input class="form-control" id="calLocation" name="location" maxlength="250" placeholder="z. B. Festzelt, Vereinsheim …"></div>
-      <div class="col-12" data-free><label class="form-label small" for="calAttire">Was anziehen?</label><textarea class="form-control" id="calAttire" name="attire" rows="2" maxlength="2000" placeholder="z. B. Uniform komplett, Zugshirt …"></textarea></div>
-      <div class="col-12"><label class="form-label small" for="calBring">Was mitbringen?</label><textarea class="form-control" id="calBring" name="bring" rows="2" maxlength="2000" placeholder="z. B. Fahne, Bierdeckel, Kuchen (wer?) …"></textarea></div>
+      <div class="col-12" data-free><label class="form-label small" for="calLocation">Ort</label><input class="form-control" id="calLocation" name="location" maxlength="250" placeholder="Festzelt, Kirche, Zugführer, Stähn-Hof, …"></div>
+      <div class="col-12" data-free><label class="form-label small" for="calAttire">Was anziehen?</label><textarea class="form-control" id="calAttire" name="attire" rows="2" maxlength="2000" placeholder="Schwarzer Anzug, Stock, Zylinder, Zug-Shirt, leichter Bieranzug, egal, …"></textarea></div>
+      <div class="col-12"><label class="form-label small" for="calBring">Was mitbringen?</label><textarea class="form-control" id="calBring" name="bring" rows="2" maxlength="2000" placeholder="Orden, Silber, Kuchen ;), Krepp, …"></textarea></div>
       <div class="col-12"><label class="form-label small" for="calNote">Bemerkung</label><textarea class="form-control" id="calNote" name="note" rows="3" maxlength="2000"></textarea></div>
     </div>
   </div>
