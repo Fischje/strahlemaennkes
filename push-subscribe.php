@@ -28,14 +28,16 @@ INSERT INTO push_subscriptions (
     p256dh,
     auth_token,
     user_agent,
+    origin_host,
     last_used_at
 )
-VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 ON CONFLICT(endpoint) DO UPDATE SET
     user_id = excluded.user_id,
     p256dh = excluded.p256dh,
     auth_token = excluded.auth_token,
     user_agent = excluded.user_agent,
+    origin_host = excluded.origin_host,
     last_used_at = CURRENT_TIMESTAMP
 SQL;
 
@@ -46,7 +48,15 @@ SQL;
         (string)$keys['p256dh'],
         (string)$keys['auth'],
         substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+        substr(request_host(), 0, 253),
     ]);
+
+    // Domain-Umzug: Wer Push auf der neuen Adresse einschaltet, bekommt keine Pushes mehr über die alte
+    // (sonst kämen alle Mitteilungen doppelt, einmal je installierter App).
+    if (domain_move_active() && request_host() === app_canonical_host()) {
+        $params = [(int)$u['id']];
+        $pdo->prepare('DELETE FROM push_subscriptions s WHERE s.user_id=?' . legacy_push_condition($params))->execute($params);
+    }
 
     echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
 } catch (JsonException $e) {

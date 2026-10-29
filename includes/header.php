@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/app.php';
 $pageTitle = $pageTitle ?? 'Strahlemännkes';
-$u = current_user();
+// $hideAppNav: Seite ohne App-Navigation und Hinweiszeilen (z. B. Umzugsseite auf der alten Adresse).
+$u = empty($hideAppNav) ? current_user() : null;
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $version = app_version();
 header('Cache-Control: no-cache, no-store, must-revalidate');

@@ -1,5 +1,12 @@
 # Changelog
 
+## Beta 0.7.26 – 29.10.2026
+
+- Vorbereitung für den Umzug auf die neue Adresse strahlemännkes.de: Wer die alte Adresse oder die alte App öffnet, sieht eine Umzugsseite und kommt mit einem Tipp angemeldet auf die neue Adresse.
+- Neue Seite „Umzug“ mit Anleitung zum Installieren der neuen App, zum Einschalten der Push-Mitteilungen und zum Löschen des alten App-Symbols.
+- Push-Mitteilungen kommen nach dem Umzug nicht doppelt: Sobald Push in der neuen App eingeschaltet ist, schweigt die alte.
+- Admins sehen unter Funktionen → Freischaltungen, wer schon umgezogen ist, und können eine Umzugs-Erinnerung an die alte App schicken.
+
 ## Beta 0.7.25 – 28.10.2026
 
 - Sicherheit verbessert: Anmeldung, Sitzungen und Schnittstellen sind besser geschützt. Änderungen an Rollen und das Deaktivieren eines Mitglieds wirken jetzt sofort.

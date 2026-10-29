@@ -386,6 +386,7 @@ function app_maintenance(PDO $pdo): void {
     $pdo->exec('DELETE FROM remember_tokens WHERE expires_at <= CURRENT_TIMESTAMP');
     $pdo->exec('DELETE FROM password_reset_tokens WHERE used_at IS NOT NULL OR expires_at <= CURRENT_TIMESTAMP');
     $pdo->exec("DELETE FROM login_attempts WHERE attempted_at < CURRENT_TIMESTAMP - INTERVAL '1 day'");
+    $pdo->exec("DELETE FROM domain_handoff_tokens WHERE expires_at < CURRENT_TIMESTAMP - INTERVAL '1 day'");
 }
 
 /** Gemeinsame Daten für die Live-Bestellung (Theke und Runde holen). */
@@ -504,13 +505,151 @@ function restore_remember_login(PDO $pdo): void {
 }
 
 function absolute_url(string $path): string {
-    $config = require __DIR__ . '/../config.php';
-    $base = $config['base_url'] ?? '';
+    $base = app_base_url();
     if ($base !== '') return rtrim($base,'/') . '/' . ltrim($path,'/');
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
     $scheme = $https ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     return $scheme . '://' . $host . '/' . ltrim($path,'/');
+}
+
+/* ---------- Domain-Umzug ----------
+ * Die offizielle Adresse steht in base_url (config.php) bzw. APP_URL. Alte Adressen stehen in legacy_hosts
+ * bzw. APP_LEGACY_HOSTS (kommagetrennt). Ruft jemand die App über eine alte Adresse auf, sieht er nur noch
+ * die Umzugsseite (umzug.php) und kann sich von dort angemeldet auf die neue Adresse bringen lassen.
+ * Ohne legacy_hosts ist alles wie bisher. */
+
+function app_base_url(): string {
+    static $base = null;
+    if ($base === null) {
+        $config = require __DIR__ . '/../config.php';
+        $base = trim((string)($config['base_url'] ?? ''));
+        if ($base === '') $base = trim((string)(getenv('APP_URL') ?: ''));
+        $base = rtrim($base, '/');
+    }
+    return $base;
+}
+
+/** Hostname in Kleinbuchstaben, ohne Port. Umlaut-Domains bitte immer in Punycode (xn--…) angeben. */
+function normalize_host(string $host): string {
+    $host = strtolower(trim($host));
+    $host = preg_replace('/:\d+$/', '', $host) ?? $host;
+    return rtrim($host, '.');
+}
+
+function app_canonical_host(): string {
+    $base = app_base_url();
+    return $base === '' ? '' : normalize_host((string)parse_url($base, PHP_URL_HOST));
+}
+
+function app_legacy_hosts(): array {
+    static $hosts = null;
+    if ($hosts === null) {
+        $config = require __DIR__ . '/../config.php';
+        $raw = $config['legacy_hosts'] ?? (getenv('APP_LEGACY_HOSTS') ?: '');
+        $list = is_array($raw) ? $raw : explode(',', (string)$raw);
+        $canonical = app_canonical_host();
+        $hosts = array_values(array_unique(array_filter(array_map(fn($h) => normalize_host((string)$h), $list),
+            fn($h) => $h !== '' && $h !== $canonical)));
+    }
+    return $hosts;
+}
+
+/** Umzug ist eingeschaltet: neue Adresse gesetzt und mindestens eine alte Adresse eingetragen. */
+function domain_move_active(): bool {
+    return app_canonical_host() !== '' && app_legacy_hosts() !== [];
+}
+
+function request_host(): string {
+    return normalize_host((string)($_SERVER['HTTP_HOST'] ?? ''));
+}
+
+/** Kommt die aktuelle Anfrage über eine alte Adresse? */
+function request_is_legacy_host(): bool {
+    return PHP_SAPI !== 'cli' && domain_move_active() && in_array(request_host(), app_legacy_hosts(), true);
+}
+
+/** Lesbare Form der neuen Adresse (Punycode wird, wenn möglich, in Umlaute zurückverwandelt). */
+function app_display_host(): string {
+    $labels = explode('.', app_canonical_host());
+    foreach ($labels as &$label) {
+        if (str_starts_with($label, 'xn--')) $label = punycode_decode_label(substr($label, 4)) ?? 'xn--' . $label;
+    }
+    return implode('.', $labels);
+}
+
+/** Punycode nach RFC 3492 (ein Namensteil ohne „xn--“), damit keine php-intl-Erweiterung nötig ist. */
+function punycode_decode_label(string $input): ?string {
+    $n = 128; $i = 0; $bias = 72; $output = [];
+    $pos = strrpos($input, '-');
+    if ($pos !== false) { $output = str_split(substr($input, 0, $pos)); $input = substr($input, $pos + 1); }
+    $len = strlen($input); $in = 0;
+    while ($in < $len) {
+        $oldi = $i; $w = 1;
+        for ($k = 36; ; $k += 36) {
+            if ($in >= $len) return null;
+            $c = ord($input[$in++]);
+            $digit = $c - 48 < 10 ? $c - 22 : ($c - 65 < 26 ? $c - 65 : ($c - 97 < 26 ? $c - 97 : 36));
+            if ($digit >= 36) return null;
+            $i += $digit * $w;
+            $t = $k <= $bias ? 1 : ($k >= $bias + 26 ? 26 : $k - $bias);
+            if ($digit < $t) break;
+            $w *= 36 - $t;
+        }
+        $count = count($output) + 1;
+        $delta = $oldi === 0 ? intdiv($i - $oldi, 700) : intdiv($i - $oldi, 2);
+        $delta += intdiv($delta, $count);
+        for ($k = 0; $delta > 455; $k += 36) $delta = intdiv($delta, 35);
+        $bias = $k + intdiv(36 * $delta, $delta + 38);
+        $n += intdiv($i, $count);
+        $i %= $count;
+        array_splice($output, $i, 0, [mb_chr($n, 'UTF-8')]);
+        $i++;
+    }
+    return $output ? implode('', $output) : null;
+}
+
+/** Einmal-Link für den angemeldeten Wechsel auf die neue Adresse (30 Minuten, einmalig). */
+function create_domain_handoff(PDO $pdo, int $userId): string {
+    $token = bin2hex(random_bytes(32));
+    $pdo->prepare("INSERT INTO domain_handoff_tokens(token_hash,user_id,expires_at) VALUES(?,?,CURRENT_TIMESTAMP + INTERVAL '30 minutes')")
+        ->execute([hash('sha256', $token), $userId]);
+    return app_base_url() . '/umzug.php?t=' . $token;
+}
+
+/** Löst einen Einmal-Link ein und liefert das (aktive) Mitglied oder null. */
+function redeem_domain_handoff(PDO $pdo, string $token): ?array {
+    if (!preg_match('/^[a-f0-9]{64}$/', $token)) return null;
+    $st = $pdo->prepare('UPDATE domain_handoff_tokens SET used_at=CURRENT_TIMESTAMP
+        WHERE token_hash=? AND used_at IS NULL AND expires_at > CURRENT_TIMESTAMP RETURNING user_id');
+    $st->execute([hash('sha256', $token)]);
+    $userId = $st->fetchColumn();
+    if ($userId === false) return null;
+    $st = $pdo->prepare('SELECT * FROM users WHERE id=? AND is_active=1');
+    $st->execute([(int)$userId]);
+    return $st->fetch() ?: null;
+}
+
+/** SQL-Bedingung für Push-Abos, die zu einer alten Adresse gehören (NULL = vor dem Umzug angelegt). */
+function legacy_push_condition(array &$params): string {
+    $hosts = app_legacy_hosts();
+    if (!$hosts) return ' AND FALSE';
+    array_push($params, ...$hosts);
+    return ' AND (s.origin_host IS NULL OR s.origin_host IN (' . implode(',', array_fill(0, count($hosts), '?')) . '))';
+}
+
+/** Auf alten Adressen ist nur die Umzugsseite erreichbar; alles andere führt dorthin. */
+function enforce_domain_move(): void {
+    if (!request_is_legacy_host()) return;
+    $script = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+    if (in_array($script, ['/umzug.php', '/background.php'], true)) return;
+    header('Cache-Control: no-store');
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && !str_contains((string)($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json')) {
+        redirect('/umzug.php');
+    }
+    http_response_code(410);
+    header('Content-Type: application/json; charset=utf-8');
+    exit(json_encode(['ok' => false, 'error' => 'Die App ist umgezogen: ' . app_base_url()], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 function meeting_local_to_utc(string $date, string $time): ?string {
@@ -591,3 +730,4 @@ function send_password_reset_mail(string $email, string $name, string $resetUrl)
 
 restore_remember_login($pdo);
 refresh_session_user($pdo);
+enforce_domain_move();
