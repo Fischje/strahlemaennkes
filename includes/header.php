@@ -127,7 +127,10 @@ header('Pragma: no-cache');
     </div>
   </div>
 </nav>
-<?php $sektbarBanner=$u ? (sektbar_is_enabled($pdo) && sektbar_is_active($pdo)) : false; $assemblyBanner=($u && !$sektbarBanner) ? active_assembly($pdo) : null; ?>
+<?php
+// Hinweisleisten nur im internen Bereich (Seiten mit require_login), nie auf Startseite, Login oder öffentlichen Seiten.
+$bannerUser=($u && !empty($GLOBALS['smInternalPage'])) ? $u : null;
+$sektbarBanner=$bannerUser ? (sektbar_is_enabled($pdo) && sektbar_is_active($pdo)) : false; $assemblyBanner=($bannerUser && !$sektbarBanner) ? active_assembly($pdo) : null; ?>
 <?php if($sektbarBanner): ?>
 <a class="sektbar-topline" href="<?=can_use_sektbar($pdo,$u)?'/sektbar.php':'/theke.php'?>"><div class="container"><strong>🥂 ✨ SEKTbarmodus aktiviert ✨ 🥂</strong></div></a>
 <?php elseif($assemblyBanner): ?>
@@ -137,7 +140,7 @@ header('Pragma: no-cache');
 <?php endif; ?>
 <?php
 $stammtischBanner=null;
-if($u && !$sektbarBanner){
+if($bannerUser && !$sektbarBanner){
   $smMeeting=active_meeting($pdo);
   if($smMeeting && $smMeeting['status']==='poll'){
     $q=$pdo->prepare('SELECT EXISTS(SELECT 1 FROM meeting_votes v JOIN meeting_poll_options o ON o.id=v.option_id WHERE o.meeting_id=? AND v.user_id=?) OR EXISTS(SELECT 1 FROM meeting_poll_declines WHERE meeting_id=? AND user_id=?)');

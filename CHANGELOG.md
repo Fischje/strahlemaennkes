@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.31 – 29.10.2026
+
+- Behoben: Die Hinweisleisten für Stammtisch, Antreten und Sektbar erschienen auch auf der Startseite und der öffentlichen Chronik, wenn man angemeldet war. Sie stehen jetzt nur noch im internen Bereich.
+
 ## Beta 0.7.30 – 29.10.2026
 
 - Aufgeräumtes Menü oben: Die Punkte sind jetzt in Gruppen zusammengefasst, damit die Leiste nicht mehr zu breit wird.

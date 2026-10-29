@@ -261,6 +261,8 @@ function require_login(): array {
     if(!empty($u['must_change_password']) && $path!=='/first-login-password.php'){
         redirect('/first-login-password.php');
     }
+    // Merker für die Kopfzeile: Hinweisleisten (Stammtisch, Antreten, Sektbar) nur auf Seiten des internen Bereichs.
+    $GLOBALS['smInternalPage']=true;
     return $u;
 }
 function require_role(string ...$roles): array { $u=require_login(); if(!in_array($u['role'],$roles,true)){ http_response_code(403); exit('Keine Berechtigung.'); } return $u; }
