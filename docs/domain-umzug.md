@@ -1,17 +1,20 @@
-# Domain-Umzug: sm.fischje.de → strahlemaennkes.de
+# Domain-Umzug: sm.fischje.de → www.strahlemaennkes.de
 
 Ab Version 0.7.26 kann die App selbst umziehen. Server, Datenbank, Reverse Proxy und Code bleiben gleich,
 nur die Adresse ändert sich.
 
-Die neue Adresse ist bewusst **ohne Umlaut**: `strahlemaennkes.de`. Sie lässt sich überall tippen, wird in
-WhatsApp und Mails zuverlässig als Link erkannt und braucht keine Punycode-Schreibweise.
+Die neue Adresse ist **`www.strahlemaennkes.de`** – bewusst ohne Umlaut (lässt sich überall tippen, wird in
+WhatsApp und Mails zuverlässig als Link erkannt, keine Punycode-Schreibweise). Die Adresse ohne „www“
+(`strahlemaennkes.de`) leitet nur per 301 auf die www-Adresse weiter.
+
+Die Kette ist **Cloudflare → NPMplus (HTTPS) → Caddy (Port 80) → php-fpm**.
 
 ## Was die App beim Umzug macht
 
 Eingeschaltet wird der Umzug über zwei Werte in der php-fpm-Pool-Datei (oder `config.php`):
 
 ```
-env[APP_URL] = https://strahlemaennkes.de
+env[APP_URL] = https://www.strahlemaennkes.de
 env[APP_LEGACY_HOSTS] = sm.fischje.de
 ```
 
@@ -35,15 +38,37 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 
 ### 1. Vorbereitung (ohne Auswirkung für die Mitglieder)
 
-1. **DNS:** Domain in Cloudflare aufnehmen (wie fischje.de), Nameserver beim Registrar auf Cloudflare stellen.
-   Einträge wie bei `sm.fischje.de` (gleiches Ziel, Proxy „orange“). SSL-Modus wie bei fischje.de.
-2. **Reverse Proxy:** `strahlemaennkes.de` als **zusätzlichen** Hostnamen auf dasselbe Ziel legen
-   (z. B. `server_name sm.fischje.de strahlemaennkes.de;`). Zertifikat für die neue Domain besorgen bzw.
-   ins vorhandene aufnehmen. Die alte Adresse **nicht** umleiten – sie muss weiter bei PHP ankommen.
-   Der Proxy muss den echten `Host`-Header durchreichen (tut er heute schon, sonst ginge die App nicht).
-3. **Test:** `https://strahlemaennkes.de` aufrufen. Die App muss normal laufen (Login ist dort getrennt, das ist richtig).
-4. Optional: Wer mag, sichert zusätzlich `strahlemännkes.de` und leitet sie per 301 auf `strahlemaennkes.de` um.
+1. **DNS (Cloudflare):** Zone `strahlemaennkes.de` anlegen, Nameserver beim Registrar auf Cloudflare stellen.
+   Zwei Einträge, beide mit Proxy „orange“: `strahlemaennkes.de` (A, Ziel wie bei `sm.fischje.de`) und
+   `www` (CNAME auf `strahlemaennkes.de`). Unter *Rules → Redirect Rules* und *Page Rules* darf **keine**
+   Regel „www → ohne www“ stehen (Cloudflare bietet die als Vorlage an).
+2. **NPMplus:** neuer Proxy Host mit **beiden** Namen `www.strahlemaennkes.de` und `strahlemaennkes.de`,
+   Ziel wie beim Proxy Host von `sm.fischje.de` (Caddy, Port 80, http). Let's-Encrypt-Zertifikat für beide Namen,
+   „Force SSL“ an. Den Proxy Host von `sm.fischje.de` nicht ändern.
+3. **Caddy** (`/etc/caddy/Caddyfile`): Im bestehenden Block die www-Adresse ergänzen und für die Adresse ohne www
+   einen eigenen Weiterleitungs-Block anlegen:
+   ```
+   sm.fischje.de:80, www.strahlemaennkes.de:80 {
+       # … alles wie bisher …
+   }
+
+   strahlemaennkes.de:80 {
+       redir https://www.strahlemaennkes.de{uri} permanent
+   }
+   ```
+   Dann `caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy`.
+   Die alte Adresse `sm.fischje.de` **nicht** umleiten – sie muss weiter bei PHP ankommen (Umzugsseite).
+4. **Test** (auf dem Caddy-Server, geht auch vor dem DNS):
+   `curl -sI -H "Host: www.strahlemaennkes.de" http://localhost/login.php` → `200`,
+   `curl -sI -H "Host: strahlemaennkes.de" http://localhost/login.php` → `301` mit `Location: https://www.strahlemaennkes.de/login.php`.
+   Danach im Browser `https://www.strahlemaennkes.de` öffnen (Login ist dort getrennt, das ist richtig).
+5. Optional: Wer mag, sichert zusätzlich `strahlemännkes.de` und leitet sie per 301 auf `www.strahlemaennkes.de` um.
    Im Proxy und bei Cloudflare heißt sie dann `xn--strahlemnnkes-ifb.de` (Punycode-Schreibweise der Umlaut-Domain).
+
+**Landet man trotzdem auf der Adresse ohne www**, kommt die Weiterleitung von außerhalb der App. Mit
+`curl -sI https://www.strahlemaennkes.de` (Antwort-Header `location:`) prüfen und der Reihe nach nachsehen:
+Cloudflare-Regeln, NPMplus-Proxy-Host (Reiter „Advanced“), Caddyfile, Weiterleitung beim Registrar.
+Browser merken sich 301-Weiterleitungen – zum Testen ein privates Fenster nehmen.
 
 ### 2. Umschalten (5 Minuten)
 
@@ -52,11 +77,11 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 2. `sudo systemctl reload php*-fpm` (der Cron-Wrapper liest dieselbe Pool-Datei, nichts weiter zu tun).
 3. Prüfen:
    - `https://sm.fischje.de/dashboard.php` → Umzugsseite.
-   - Knopf „Weiter zur neuen Adresse“ → angemeldet auf `strahlemaennkes.de`.
+   - Knopf „Weiter zur neuen Adresse“ → angemeldet auf `www.strahlemaennkes.de`.
    - „Passwort vergessen“ schickt einen Link mit der neuen Adresse.
    - Admin-Karte „Umzug“ unter Funktionen → Freischaltungen erscheint.
 
-**Zurück:** `APP_LEGACY_HOSTS` leeren, `APP_URL` wieder auf `https://sm.fischje.de`, php-fpm neu laden.
+**Zurück:** `APP_LEGACY_HOSTS` entfernen, `APP_URL` wieder auf `https://sm.fischje.de`, php-fpm neu laden.
 
 ### 3. Mitglieder mitnehmen (2–6 Wochen)
 
@@ -66,8 +91,8 @@ Ohne `APP_LEGACY_HOSTS` verhält sich die App wie bisher.
 
 ### 4. Abschluss
 
-Wenn (fast) alle umgezogen sind: im Reverse Proxy `sm.fischje.de` per **301** auf `https://strahlemaennkes.de$request_uri`
-umleiten. Danach funktionieren Umzugsseite und automatische Anmeldung von der alten Adresse aus nicht mehr,
+Wenn (fast) alle umgezogen sind: im Reverse Proxy `sm.fischje.de` per **301** umleiten, z. B. in Caddy
+`sm.fischje.de:80 { redir https://www.strahlemaennkes.de{uri} permanent }`. Danach funktionieren Umzugsseite und automatische Anmeldung von der alten Adresse aus nicht mehr,
 Nachzügler melden sich einfach mit Passwort an. Die Weiterleitung mindestens ein Jahr stehen lassen.
 
 ## Gut zu wissen
@@ -80,7 +105,7 @@ Nachzügler melden sich einfach mit Passwort an. Die Weiterleitung mindestens ei
 
 ## WhatsApp-Vorschlag
 
-> 📦 **Unsere Zug-App zieht um!** Neue Adresse: **strahlemaennkes.de**
+> 📦 **Unsere Zug-App zieht um!** Neue Adresse: **www.strahlemaennkes.de**
 > Öffnet einfach einmal die alte App (oder sm.fischje.de) und tippt auf „Weiter zur neuen Adresse“ –
 > ihr seid dann automatisch angemeldet. Danach: neue App installieren, Mitteilungen erlauben, altes Symbol löschen.
 > Dauert eine Minute. Fragen gerne an mich. 🍻
