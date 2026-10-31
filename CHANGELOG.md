@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.44 – 31.10.2026
+
+- Kalender: Der heutige Tag ist jetzt mit einem hellblauen statt einem roten Kreis markiert.
+
 ## Beta 0.7.43 – 31.10.2026
 
 - Stammtisch-Tagesordnung: Zu jedem Tagesordnungspunkt steht jetzt, von wem er kommt, und eine Zeile, worum es geht – schon in Phase 2 zur Vorbereitung, im Protokoll, im Archiv und im PDF.
