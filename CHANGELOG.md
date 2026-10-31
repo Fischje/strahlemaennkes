@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.43 – 31.10.2026
+
+- Stammtisch-Tagesordnung: Zu jedem Tagesordnungspunkt steht jetzt, von wem er kommt, und eine Zeile, worum es geht – schon in Phase 2 zur Vorbereitung, im Protokoll, im Archiv und im PDF.
+- Themen vorschlagen: Neben der Überschrift gibt es ein Feld „Worum geht's?“. Beim Übernehmen in die Tagesordnung werden Name und Beschreibung mitgenommen.
+- Tagesordnungspunkte lassen sich nachträglich bearbeiten (Titel, Beschreibung, von wem).
+
 ## Beta 0.7.42 – 31.10.2026
 
 - Einstellungen: Neuer Bereich „Mein Konto“. Jedes Mitglied kann seinen Benutzernamen und seine E-Mail-Adresse selbst ändern (zur Sicherheit mit dem aktuellen Passwort). Bei einer neuen E-Mail-Adresse bekommt die bisherige Adresse einen Hinweis.

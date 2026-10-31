@@ -522,6 +522,37 @@ function absolute_url(string $path): string {
     return $scheme . '://' . $host . '/' . ltrim($path,'/');
 }
 
+/* ---------- Tagesordnung: von wem + Kurzbeschreibung ---------- */
+
+/** Kurzbeschreibung eines TOPs: eine Zeile, höchstens 200 Zeichen. */
+function agenda_line(string $text): string {
+    return mb_substr(trim(preg_replace('/\s+/u', ' ', $text) ?? ''), 0, 200);
+}
+
+/** SQL-Teile für TOP-Abfragen: Name des Einbringers als proposer_name (Tabellenalias a für meeting_agenda_items). */
+const AGENDA_PROPOSER_SELECT = "TRIM(COALESCE(pp.first_name,'')||' '||COALESCE(pp.last_name,'')) AS proposer_name";
+const AGENDA_PROPOSER_JOIN = ' LEFT JOIN users pp ON pp.id=a.proposed_by';
+
+/** Unter dem TOP-Titel: Kurzbeschreibung und „von Name“ je in einer eigenen Zeile (leer, wenn nichts bekannt ist). */
+function agenda_meta_html(array $item): string {
+    $html = '';
+    $sum = trim((string)($item['summary'] ?? ''));
+    if ($sum !== '') $html .= '<div class="agenda-summary">' . e($sum) . '</div>';
+    $who = trim((string)($item['proposer_name'] ?? ''));
+    if ($who !== '') $html .= '<div class="agenda-proposer small text-secondary">von ' . e($who) . '</div>';
+    return $html === '' ? '' : '<div class="agenda-meta">' . $html . '</div>';
+}
+
+/** Text-Variante für das PDF. */
+function agenda_meta_text(array $item): string {
+    $parts = [];
+    $who = trim((string)($item['proposer_name'] ?? ''));
+    if ($who !== '') $parts[] = 'von ' . $who;
+    $sum = trim((string)($item['summary'] ?? ''));
+    if ($sum !== '') $parts[] = $sum;
+    return implode(' · ', $parts);
+}
+
 /* ---------- Domain-Umzug ----------
  * Die offizielle Adresse steht in base_url (config.php) bzw. APP_URL. Alte Adressen stehen in legacy_hosts
  * bzw. APP_LEGACY_HOSTS (kommagetrennt). Ruft jemand die App über eine alte Adresse auf, sieht er nur noch

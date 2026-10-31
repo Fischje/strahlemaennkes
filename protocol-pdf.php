@@ -8,7 +8,7 @@ $q->execute([(int)($_GET['meeting']??0)]);
 $m=$q->fetch();
 if(!$m){http_response_code(404);exit('Protokoll nicht gefunden.');}
 
-$q=$pdo->prepare('SELECT * FROM meeting_agenda_items WHERE meeting_id=? ORDER BY sort_order,id');
+$q=$pdo->prepare('SELECT a.*,'.AGENDA_PROPOSER_SELECT.' FROM meeting_agenda_items a'.AGENDA_PROPOSER_JOIN.' WHERE a.meeting_id=? ORDER BY a.sort_order,a.id');
 $q->execute([$m['id']]);
 $items=$q->fetchAll();
 $q=$pdo->prepare('SELECT TRIM(u.first_name||\' \'||u.last_name) FROM meeting_attendees a JOIN users u ON u.id=a.user_id WHERE a.meeting_id=? ORDER BY u.last_name,u.first_name');
@@ -34,6 +34,7 @@ $taskLine=function(array $t): string{
 
 foreach($items as $n=>$item){
     $pdf->text(($n+1).'. '.$item['title'],13,true,0,'',3);
+    if(($meta=agenda_meta_text($item))!=='') $pdf->text($meta,9.5,false,0,'',3);
     if(trim((string)$item['protocol_html'])!=='') pdf_add_html($pdf,$pdo,(string)$item['protocol_html']);
     else $pdf->text('Kein Protokolleintrag.',10,false,0,'',3);
     foreach($tasksByItem[(int)$item['id']]??[] as $t) $pdf->text($taskLine($t),10,false,14,'',2);
