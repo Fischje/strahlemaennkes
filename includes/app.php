@@ -726,27 +726,37 @@ function meeting_audit(PDO $pdo, int $meetingId, int $userId, string $event, ?st
     $pdo->prepare('INSERT INTO meeting_audit(meeting_id,user_id,event,details) VALUES(?,?,?,?)')->execute([$meetingId,$userId,$event,$details]);
 }
 
-function send_password_reset_mail(string $email, string $name, string $resetUrl): bool {
+/** Verschickt eine Text-Mail der App (über PHP mail() → msmtp auf dem Server). */
+function send_app_mail(string $email, string $subject, string $body): bool {
     $config = require __DIR__ . '/../config.php';
     $from = $config['mail']['from'] ?? 'fischje@fischje.de';
     $fromName = $config['mail']['from_name'] ?? 'Schützenzug Strahlemännkes';
-    $subject = function_exists('mb_encode_mimeheader') ? mb_encode_mimeheader('Strahlemännkes – Passwort zurücksetzen', 'UTF-8') : 'Strahlemännkes - Passwort zurücksetzen';
-    $body = "Hallo {$name},\n\nüber diesen Link kannst du dein Passwort neu setzen:\n{$resetUrl}\n\nDer Link ist 60 Minuten gültig. Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren.\n\nSchützenzug Strahlemännkes";
-    $fromHeader = function_exists('mb_encode_mimeheader') ? mb_encode_mimeheader($fromName, 'UTF-8') . ' <' . $from . '>' : $from;
+    $encode = fn(string $t) => function_exists('mb_encode_mimeheader') ? mb_encode_mimeheader($t, 'UTF-8') : $t;
     $domain = substr(strrchr($from, '@') ?: '@localhost', 1);
     // Vollständige Kopfzeilen: ohne MIME-Version zeigen manche Mailprogramme Umlaute falsch an,
     // ohne Date/Message-ID landen Mails eher im Spam.
     $headers = [
-        'From: ' . $fromHeader,
+        'From: ' . $encode($fromName) . ' <' . $from . '>',
         'Date: ' . date(DATE_RFC2822),
         'Message-ID: <' . bin2hex(random_bytes(16)) . '@' . $domain . '>',
         'MIME-Version: 1.0',
         'Content-Type: text/plain; charset=UTF-8',
         'Content-Transfer-Encoding: 8bit',
     ];
-    $sent = @mail($email, $subject, $body, implode("\r\n", $headers));
-    if (!$sent) error_log('Strahlemännkes: Passwort-Reset-Mail konnte nicht an ' . $email . ' versendet werden.');
+    $sent = @mail($email, $encode($subject), $body, implode("\r\n", $headers));
+    if (!$sent) error_log('Strahlemännkes: Mail „' . $subject . '“ konnte nicht an ' . $email . ' versendet werden.');
     return $sent;
+}
+
+function send_password_reset_mail(string $email, string $name, string $resetUrl): bool {
+    $body = "Hallo {$name},\n\nüber diesen Link kannst du dein Passwort neu setzen:\n{$resetUrl}\n\nDer Link ist 60 Minuten gültig. Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren.\n\nSchützenzug Strahlemännkes";
+    return send_app_mail($email, 'Strahlemännkes – Passwort zurücksetzen', $body);
+}
+
+/** Hinweis an die bisherige Adresse, wenn ein Mitglied seine E-Mail-Adresse ändert. */
+function send_email_changed_mail(string $oldEmail, string $name, string $newEmail): bool {
+    $body = "Hallo {$name},\n\ndie E-Mail-Adresse deines Kontos in der Strahlemännkes-App wurde gerade geändert auf:\n{$newEmail}\n\nWarst du das selbst, ist alles in Ordnung. Falls nicht, melde dich bitte sofort beim Administrator.\n\nSchützenzug Strahlemännkes";
+    return send_app_mail($oldEmail, 'Strahlemännkes – E-Mail-Adresse geändert', $body);
 }
 
 restore_remember_login($pdo);

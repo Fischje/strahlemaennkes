@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.42 – 31.10.2026
+
+- Einstellungen: Neuer Bereich „Mein Konto“. Jedes Mitglied kann seinen Benutzernamen und seine E-Mail-Adresse selbst ändern (zur Sicherheit mit dem aktuellen Passwort). Bei einer neuen E-Mail-Adresse bekommt die bisherige Adresse einen Hinweis.
+
 ## Beta 0.7.41 – 31.10.2026
 
 - E-Mail „Passwort zurücksetzen“: Umlaute werden in allen Mailprogrammen richtig angezeigt, als Absender steht „Schützenzug Strahlemännkes“, und die Mail landet seltener im Spam.
