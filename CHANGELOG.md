@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.41 – 31.10.2026
+
+- E-Mail „Passwort zurücksetzen“: Umlaute werden in allen Mailprogrammen richtig angezeigt, als Absender steht „Schützenzug Strahlemännkes“, und die Mail landet seltener im Spam.
+
 ## Beta 0.7.40 – 29.10.2026
 
 - Kalender am Handy: Statt nur eines Farbstreifens stehen jetzt die Anfangsbuchstaben jedes Termins im Tag, damit man sofort sieht, was ansteht.
