@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.45 – 02.11.2026
+
+- Fehler behoben: Auf dem Handy legte sich beim Öffnen eines Dialogs (z. B. „Kassenstand eintragen“) ein grauer Schleier über das Fenster, und man konnte nichts eingeben. Betraf alle Dialoge im Seiteninhalt.
+
 ## Beta 0.7.44 – 31.10.2026
 
 - Kalender: Der heutige Tag ist jetzt mit einem hellblauen statt einem roten Kreis markiert.

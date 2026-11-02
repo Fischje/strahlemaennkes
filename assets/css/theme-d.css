@@ -28,11 +28,15 @@ html { background:#0B0C0E !important; }
 body { background:transparent !important; color:var(--sm-text); }
 /* Hintergrund-Muster: liegt fest hinter der Seite, wird gekachelt und scheint zu 15 % durch (Funktionen → Bilder der Seite). */
 body::before {
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background-image:var(--sm-bg-image, none); background-size:auto; background-position:top left; background-repeat:repeat; /* Muster wird gekachelt */
   opacity:.15;
 }
 main, .app-footer { position:relative; z-index:1; }
+/* main darf keinen eigenen z-index haben: sonst liegen Dialoge (.modal) in main unter dem grauen
+   Hintergrund (.modal-backdrop), den Bootstrap an <body> hängt – die Eingabefelder sind dann gesperrt.
+   Die Hintergrund-Ebenen (body::before/::after) liegen deshalb bei z-index:-1. */
+main { z-index:auto !important; }
 .text-secondary { color: var(--sm-muted) !important; }
 .text-white, .text-light { color: var(--sm-text) !important; }
 .border, .border-top, .border-bottom { border-color: var(--sm-border-dark) !important; }
@@ -239,7 +243,7 @@ body.home-page .home-minimal-card { background-color:transparent !important; }
 main { background:var(--sm-bg); }
 .app-navbar { box-shadow:0 1px 1px rgba(14,17,22,.04), 0 18px 40px -26px rgba(14,17,22,.25) !important; }
 /* Schatten der Spalte liegt hinter den Inhalten, damit er die gelbe Zeile nicht abdunkelt */
-body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(100%,var(--sm-shell)); transform:translateX(-50%); box-shadow:0 0 90px rgba(0,0,0,.6); z-index:0; pointer-events:none; }
+body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(100%,var(--sm-shell)); transform:translateX(-50%); box-shadow:0 0 90px rgba(0,0,0,.6); z-index:-1; pointer-events:none; }
 /* In der Spalte bleibt seitlich Luft */
 @media (min-width:1400px){
   .app-navbar > .container, main .container, .app-footer .container { max-width:calc(var(--sm-shell) - 48px); }
