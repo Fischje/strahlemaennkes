@@ -33,21 +33,22 @@ require __DIR__.'/../includes/header.php';
           <div class="timeline-row <?=$i<count($years)-1?'pb-5':''?>">
             <div class="chronik-year"><?=e((string)$y['year'])?></div>
             <h2 class="h5 mt-2">Zugjahr <?=e((string)$y['year'])?></h2>
-            <div class="row row-cols-1 row-cols-sm-2 g-3 mt-2">
-              <?php foreach([
-                'Zugkönig'=>$y['zugkoenig'],
-                'Zugführer'=>$y['zugfuehrer'],
-                'Zugspieß'=>$y['zugspiess'],
-                'Kassierer'=>$y['kassierer'],
-                'Schriftführer'=>$y['schriftfuehrer'],
-                '1. Offizier'=>$y['erster_offizier'],
-                '2. Offizier'=>$y['zweiter_offizier'],
-              ] as $label=>$value): ?>
-                <?php if(trim((string)$value)!==''): ?>
+            <?php foreach([
+              // Feste Zeilen: König + Führer, beide Offiziere, Spieß + Schriftführer, Kassierer
+              ['Zugkönig'=>$y['zugkoenig'],'Zugführer'=>$y['zugfuehrer']],
+              ['1. Offizier'=>$y['erster_offizier'],'2. Offizier'=>$y['zweiter_offizier']],
+              ['Zugspieß'=>$y['zugspiess'],'Schriftführer'=>$y['schriftfuehrer']],
+              ['Kassierer'=>$y['kassierer']],
+            ] as $offices):
+              $offices=array_filter($offices,fn($v)=>trim((string)$v)!=='');
+              if(!$offices) continue;
+              $isFirst=!isset($isFirst); ?>
+              <div class="row row-cols-1 row-cols-sm-2 g-3 <?=$isFirst?'mt-2':'mt-0'?>">
+                <?php foreach($offices as $label=>$value): ?>
                   <div class="col"><span class="text-secondary"><?=e($label)?></span><br><strong><?=e($value)?></strong></div>
-                <?php endif;?>
-              <?php endforeach;?>
-            </div>
+                <?php endforeach;?>
+              </div>
+            <?php endforeach; unset($isFirst);?>
             <?php if(trim((string)$y['notes'])!==''): ?>
               <div class="chronik-notes mt-4"><?=nl2br(e($y['notes']))?></div>
             <?php endif;?>

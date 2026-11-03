@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.46 – 03.11.2026
+
+- Chronik: Neue Reihenfolge der Ämter – Zugkönig und Zugführer, dann 1. und 2. Offizier, dann Zugspieß und Schriftführer, zuletzt der Kassierer. Gilt für die öffentliche Seite und das Bearbeiten-Fenster.
+
 ## Beta 0.7.45 – 02.11.2026
 
 - Fehler behoben: Auf dem Handy legte sich beim Öffnen eines Dialogs (z. B. „Kassenstand eintragen“) ein grauer Schleier über das Fenster, und man konnte nichts eingeben. Betraf alle Dialoge im Seiteninhalt.

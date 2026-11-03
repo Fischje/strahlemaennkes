@@ -112,11 +112,11 @@ require __DIR__.'/includes/header.php';
       <div class="col-12 col-md-4"><label class="form-label">Jahr</label><input type="number" min="1900" max="2200" class="form-control" name="year" id="chronikYear" required></div>
       <div class="col-md-6"><label class="form-label">Zugkönig</label><input class="form-control" name="zugkoenig" id="chronikZugkoenig"></div>
       <div class="col-md-6"><label class="form-label">Zugführer</label><input class="form-control" name="zugfuehrer" id="chronikZugfuehrer"></div>
-      <div class="col-md-6"><label class="form-label">Zugspieß</label><input class="form-control" name="zugspiess" id="chronikZugspiess"></div>
-      <div class="col-md-6"><label class="form-label">Kassierer</label><input class="form-control" name="kassierer" id="chronikKassierer"></div>
-      <div class="col-md-6"><label class="form-label">Schriftführer</label><input class="form-control" name="schriftfuehrer" id="chronikSchriftfuehrer"></div>
       <div class="col-md-6"><label class="form-label">1. Offizier</label><input class="form-control" name="erster_offizier" id="chronikErster"></div>
       <div class="col-md-6"><label class="form-label">2. Offizier</label><input class="form-control" name="zweiter_offizier" id="chronikZweiter"></div>
+      <div class="col-md-6"><label class="form-label">Zugspieß</label><input class="form-control" name="zugspiess" id="chronikZugspiess"></div>
+      <div class="col-md-6"><label class="form-label">Schriftführer</label><input class="form-control" name="schriftfuehrer" id="chronikSchriftfuehrer"></div>
+      <div class="col-md-6"><label class="form-label">Kassierer</label><input class="form-control" name="kassierer" id="chronikKassierer"></div>
       <div class="col-12"><label class="form-label">Notizen / Besonderheiten</label><textarea class="form-control" name="notes" id="chronikNotes" rows="4"></textarea></div>
       <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="published" value="1" id="chronikPublished" checked><label class="form-check-label" for="chronikPublished">Öffentlich anzeigen</label></div></div>
     </div>
