@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.47 – 08.11.2026
+
+- Protokoll-Archiv: Die Änderungshistorie unter einem Protokoll zeigt nur noch, wann und von wem es abgeschlossen oder wieder geöffnet wurde – auf Deutsch statt mit technischen Begriffen.
+
 ## Beta 0.7.46 – 03.11.2026
 
 - Chronik: Neue Reihenfolge der Ämter – Zugkönig und Zugführer, dann 1. und 2. Offizier, dann Zugspieß und Schriftführer, zuletzt der Kassierer. Gilt für die öffentliche Seite und das Bearbeiten-Fenster.
