@@ -4,14 +4,26 @@
  * Termine liegen in calendar_events (Ortszeit), Stammtische kommen direkt aus meetings.
  */
 
-/** Feste Kategorien. Farben und Namen sind bewusst nicht änderbar, neue Kategorien gibt es (noch) nicht. */
+/** Feste Kategorien. Farben und Namen sind bewusst nicht änderbar. */
 const CALENDAR_CATEGORIES = [
     'kirmes'          => ['label' => 'Kirmes',           'color' => '#43A047', 'text' => '#FFFFFF'],
     'zugtreffen'      => ['label' => 'Zugtreffen',       'color' => '#FBC02D', 'text' => '#212429'],
     'ausserhalb'      => ['label' => 'Außerhalb Kirmes', 'color' => '#7A808A', 'text' => '#FFFFFF'],
-    'ausflug'         => ['label' => 'Grober Ausflug',   'color' => '#E53935', 'text' => '#FFFFFF'],
+    'ausflug'         => ['label' => 'Grober Ausflug',   'color' => '#FF7A66', 'text' => '#212429'],
     'weihnachtsfeier' => ['label' => 'Weihnachtsfeier',  'color' => '#8B0000', 'text' => '#FFFFFF'],
+    'reise'           => ['label' => 'Reise',            'color' => '#0E7C8A', 'text' => '#FFFFFF'],
+    'unfug'           => ['label' => 'Grober Unfug',     'color' => '#FF3D8B', 'text' => '#212429'],
 ];
+/**
+ * Diese Kategorien kommen nur aus den Events von Grober Unfug (Schema grober_unfug, Seite /grober-unfug/)
+ * und lassen sich hier nicht von Hand wählen. Zuordnung der Unfug-Arten in calendar_union_sql().
+ */
+const CALENDAR_UNFUG_CATEGORIES = ['ausflug', 'weihnachtsfeier', 'reise', 'unfug'];
+
+/** Kategorien, die man beim Eintragen auswählen kann. */
+function calendar_manual_categories(): array {
+    return array_diff_key(CALENDAR_CATEGORIES, array_flip(CALENDAR_UNFUG_CATEGORIES));
+}
 /** Antreten gibt es nur an der Kirmes, daher feste Kategorie. */
 const CALENDAR_ASSEMBLY_CATEGORY = 'kirmes';
 
@@ -20,37 +32,79 @@ function can_edit_calendar(PDO $pdo, ?array $user=null): bool {
     return is_leader() || is_secretary() || can_act_as_spiess($pdo, $user);
 }
 
-/** Alle Kalendereinträge (eigene Termine + festgelegte Stammtische) als eine Abfrage. */
-const CALENDAR_UNION_SQL = <<<'SQL'
+/**
+ * Alle Kalendereinträge als eine Abfrage: eigene Termine, festgelegte Stammtische und – wenn lesbar – die Events
+ * von Grober Unfug. Mehrtägige Unfug-Events (Reisen) liefern eine Zeile pro Tag; day_no zählt die Tage ab 0,
+ * end_date ist der letzte Tag. Fehlt das Schema grober_unfug oder das Leserecht, fehlen nur diese Events.
+ */
+function calendar_union_sql(PDO $pdo): string {
+    $sql = <<<'SQL'
 SELECT 'event' AS kind, e.id, e.title, e.category, e.event_date, e.start_time, e.end_time, e.location, e.note, e.attire, e.bring, e.source,
-       TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')) AS author, NULL::varchar AS status, e.updated_at AS changed_at
+       TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')) AS author, NULL::varchar AS status, e.updated_at AS changed_at,
+       NULL::date AS end_date, 0 AS day_no
 FROM calendar_events e LEFT JOIN users c ON c.id=e.created_by
 UNION ALL
 SELECT 'meeting', m.id, m.title, 'zugtreffen',
        ((m.starts_at_utc AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Berlin')::date,
        ((m.starts_at_utc AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Berlin')::time,
        NULL::time, m.location, m.note, '', '', 'meeting',
-       TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')), m.status, m.updated_at
+       TRIM(COALESCE(c.first_name,'')||' '||COALESCE(c.last_name,'')), m.status, m.updated_at,
+       NULL::date, 0
 FROM meetings m LEFT JOIN users c ON c.id=m.created_by
 WHERE m.status IN ('scheduled','running','completed') AND m.starts_at_utc IS NOT NULL
 SQL;
+    if (calendar_unfug_available($pdo)) {
+        // Grober Unfug speichert Ortszeit, hier wird mit UTC gerechnet (changed_at).
+        $sql .= <<<'SQL'
+
+UNION ALL
+SELECT 'unfug', g.id, g.title,
+       CASE g.type WHEN 'sommer' THEN 'ausflug' WHEN 'weihnacht' THEN 'weihnachtsfeier' WHEN 'reise' THEN 'reise' ELSE 'unfug' END,
+       d.day::date,
+       CASE WHEN d.day::date = g.starts_on THEN NULLIF(g.start_time,'')::time END,
+       NULL::time, g.location, g.tagline, '', '', 'unfug',
+       'Grober Unfug', NULL::varchar, (g.updated_at AT TIME ZONE 'Europe/Berlin') AT TIME ZONE 'UTC',
+       COALESCE(g.ends_on, g.starts_on), (d.day::date - g.starts_on)
+FROM grober_unfug.events g
+CROSS JOIN LATERAL generate_series(g.starts_on, COALESCE(g.ends_on, g.starts_on), INTERVAL '1 day') AS d(day)
+SQL;
+    }
+    return $sql;
+}
+
+/** Ob die Events von Grober Unfug lesbar sind (Schema da, Rechte gesetzt, siehe grober-unfug/bin/datenbank-rechte.sql). */
+function calendar_unfug_available(PDO $pdo): bool {
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    try {
+        $ok = (bool)$pdo->query("SELECT CASE
+            WHEN NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='grober_unfug') THEN false
+            WHEN NOT has_schema_privilege('grober_unfug','USAGE') THEN false
+            WHEN to_regclass('grober_unfug.events') IS NULL THEN false
+            ELSE has_table_privilege('grober_unfug.events','SELECT') END")->fetchColumn();
+    } catch (Throwable $e) {
+        $ok = false;
+    }
+    return $ok;
+}
 const CALENDAR_ORDER_SQL = ' ORDER BY event_date, start_time NULLS FIRST, title, kind, id';
 
 /** Einträge zwischen zwei Tagen (jeweils einschließlich, Format Y-m-d). */
 function calendar_entries_between(PDO $pdo, string $from, string $to): array {
-    $q = $pdo->prepare('SELECT * FROM (' . CALENDAR_UNION_SQL . ') x WHERE event_date BETWEEN ? AND ?' . CALENDAR_ORDER_SQL);
+    $q = $pdo->prepare('SELECT * FROM (' . calendar_union_sql($pdo) . ') x WHERE event_date BETWEEN ? AND ?' . CALENDAR_ORDER_SQL);
     $q->execute([$from, $to]);
     return array_map('calendar_normalize', $q->fetchAll());
 }
 
-/** Anstehende Einträge ab heute, seitenweise. Liefert [Einträge, Gesamtzahl]. */
+/** Anstehende Einträge ab heute, seitenweise. Liefert [Einträge, Gesamtzahl]. Mehrtägige nur einmal (laufende am heutigen Tag). */
 function calendar_upcoming(PDO $pdo, int $limit, int $offset): array {
     $today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('Y-m-d');
-    $q = $pdo->prepare('SELECT COUNT(*) FROM (' . CALENDAR_UNION_SQL . ') x WHERE event_date >= ?');
-    $q->execute([$today]);
+    $where = ' WHERE event_date >= ? AND (day_no = 0 OR event_date = ?)';
+    $q = $pdo->prepare('SELECT COUNT(*) FROM (' . calendar_union_sql($pdo) . ') x' . $where);
+    $q->execute([$today, $today]);
     $total = (int)$q->fetchColumn();
-    $q = $pdo->prepare('SELECT * FROM (' . CALENDAR_UNION_SQL . ') x WHERE event_date >= ?' . CALENDAR_ORDER_SQL . ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset);
-    $q->execute([$today]);
+    $q = $pdo->prepare('SELECT * FROM (' . calendar_union_sql($pdo) . ') x' . $where . CALENDAR_ORDER_SQL . ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset);
+    $q->execute([$today, $today]);
     return [array_map('calendar_normalize', $q->fetchAll()), $total];
 }
 
@@ -60,22 +114,30 @@ function calendar_normalize(array $r): array {
     $start = $r['start_time'] ? substr((string)$r['start_time'], 0, 5) : '';
     $end = $r['end_time'] ? substr((string)$r['end_time'], 0, 5) : '';
     $link = '';
-    if ($r['kind'] === 'meeting') {
+    if ($r['kind'] === 'unfug') {
+        $link = UNFUG_PATH . 'event.php?id=' . (int)$r['id'];
+    } elseif ($r['kind'] === 'meeting') {
         $link = $r['status'] === 'completed' ? '/protokolle.php?meeting=' . (int)$r['id'] : '/stammtisch.php';
     } elseif ($r['source'] === 'assembly') {
         $link = '/antreten.php';
     }
+    $endDate = (string)($r['end_date'] ?? '');
+    // Mehrtägig (nur Unfug-Reisen): eine Zeile pro Tag, das Popup zeigt den ganzen Zeitraum.
+    $multi = $endDate !== '' && ($endDate !== (string)$r['event_date'] || (int)($r['day_no'] ?? 0) > 0);
+    $firstDay = $multi ? (new DateTimeImmutable((string)$r['event_date']))->modify('-' . (int)$r['day_no'] . ' days')->format('Y-m-d') : (string)$r['event_date'];
     return [
-        'key' => ($r['kind'] === 'meeting' ? 'm' : 'e') . (int)$r['id'],
+        'key' => (['meeting' => 'm', 'unfug' => 'u'][$r['kind']] ?? 'e') . (int)$r['id'],
         'kind' => $r['kind'],
         'id' => (int)$r['id'],
         'title' => (string)$r['title'],
         'category' => $cat,
         'date' => (string)$r['event_date'],
-        'dateLabel' => calendar_date_label((string)$r['event_date']),
+        'dateLabel' => $multi ? calendar_date_label($firstDay) . ' bis ' . calendar_date_label($endDate) : calendar_date_label((string)$r['event_date']),
+        'firstDay' => $firstDay,
+        'endDate' => $multi ? $endDate : '',
         'start' => $start,
         'end' => $end,
-        'timeLabel' => $start === '' ? 'ganztägig' : ($end !== '' ? $start . '–' . $end . ' Uhr' : $start . ' Uhr'),
+        'timeLabel' => $multi ? 'mehrtägig' : ($start === '' ? 'ganztägig' : ($end !== '' ? $start . '–' . $end . ' Uhr' : $start . ' Uhr')),
         'location' => (string)$r['location'],
         'note' => (string)$r['note'],
         'attire' => (string)$r['attire'],
@@ -184,7 +246,8 @@ function ics_line(string $line): string {
  */
 function calendar_ics(PDO $pdo): string {
     $from = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->modify('-1 year')->format('Y-m-d');
-    $q = $pdo->prepare('SELECT * FROM (' . CALENDAR_UNION_SQL . ') x WHERE event_date >= ?' . CALENDAR_ORDER_SQL);
+    // Mehrtägige Unfug-Events nur einmal (erster Tag), sie bekommen unten einen Zeitraum.
+    $q = $pdo->prepare('SELECT * FROM (' . calendar_union_sql($pdo) . ') x WHERE event_date >= ? AND day_no = 0' . CALENDAR_ORDER_SQL);
     $q->execute([$from]);
     $host = parse_url(app_base_url(), PHP_URL_HOST) ?: 'strahlemaennkes';
     $calendarUrl = absolute_url('/calendar.php');
@@ -209,7 +272,12 @@ function calendar_ics(PDO $pdo): string {
         $lines[] = 'LAST-MODIFIED:' . $changed->format('Ymd\THis\Z');
         // Aufsteigend mit jeder Änderung (Minuten seit 2026), damit Kalender-Apps die neue Fassung übernehmen.
         $lines[] = 'SEQUENCE:' . max(0, intdiv($changed->getTimestamp() - 1767225600, 60));
-        if ($x['start'] === '') {
+        if ($x['endDate'] !== '') {
+            $last = DateTimeImmutable::createFromFormat('!Y-m-d', $x['endDate'], new DateTimeZone('Europe/Berlin'));
+            $lines[] = 'DTSTART;VALUE=DATE:' . $day->format('Ymd');
+            $lines[] = 'DTEND;VALUE=DATE:' . $last->modify('+1 day')->format('Ymd');
+            $lines[] = 'TRANSP:TRANSPARENT';
+        } elseif ($x['start'] === '') {
             $lines[] = 'DTSTART;VALUE=DATE:' . $day->format('Ymd');
             $lines[] = 'DTEND;VALUE=DATE:' . $day->modify('+1 day')->format('Ymd');
             $lines[] = 'TRANSP:TRANSPARENT';
@@ -226,11 +294,12 @@ function calendar_ics(PDO $pdo): string {
         if ($x['bring'] !== '') $desc[] = 'Was mitbringen: ' . $x['bring'];
         if ($x['note'] !== '') $desc[] = 'Bemerkung: ' . $x['note'];
         $desc[] = 'Kategorie: ' . CALENDAR_CATEGORIES[$x['category']]['label'];
-        $desc[] = 'Eingetragen von ' . $x['author'];
+        if ($x['kind'] === 'unfug') $desc[] = 'Alles Weitere, Zu- und Absage: ' . absolute_url($x['link']);
+        else $desc[] = 'Eingetragen von ' . $x['author'];
         $desc[] = 'Änderungen nur über ' . $calendarUrl;
         $lines[] = 'DESCRIPTION:' . ics_text(implode("\n", $desc));
         $lines[] = 'CATEGORIES:' . ics_text(CALENDAR_CATEGORIES[$x['category']]['label']);
-        $lines[] = 'URL:' . $calendarUrl . '?m=' . substr($x['date'], 0, 7);
+        $lines[] = 'URL:' . ($x['kind'] === 'unfug' ? absolute_url($x['link']) : $calendarUrl . '?m=' . substr($x['date'], 0, 7));
         $lines[] = 'STATUS:CONFIRMED';
         $lines[] = 'CLASS:PRIVATE';
         $lines[] = 'END:VEVENT';

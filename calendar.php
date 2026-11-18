@@ -58,7 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $category = (string)($_POST['category'] ?? '');
-        if (!isset(CALENDAR_CATEGORIES[$category])) throw new RuntimeException('Bitte eine Kategorie auswählen.');
+        // Grober Ausflug, Weihnachtsfeier, Reise und Grober Unfug kommen nur aus Grober Unfug. Ältere Einträge behalten ihre Kategorie.
+        $keepsOld = $existing && $existing['category'] === $category && isset(CALENDAR_CATEGORIES[$category]);
+        if (!$keepsOld && !isset(calendar_manual_categories()[$category])) throw new RuntimeException('Bitte eine Kategorie auswählen. Events von Grober Unfug werden dort angelegt.');
         $attire = $longText('attire', 'Was anziehen?');
         $title = trim((string)($_POST['title'] ?? ''));
         if (mb_strlen($title, 'UTF-8') < 2 || mb_strlen($title, 'UTF-8') > 160) throw new RuntimeException('Bitte einen Namen mit 2 bis 160 Zeichen angeben.');
@@ -145,7 +147,7 @@ require __DIR__ . '/includes/header.php';
 <section class="col-12">
   <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
     <div><div class="eyebrow">Termine des Zuges</div><h1 class="section-title h2 mb-1">Kalender</h1>
-      <p class="text-secondary mb-0">Antreten und festgelegte Stammtische erscheinen automatisch.</p></div>
+      <p class="text-secondary mb-0">Antreten, festgelegte Stammtische und die Events von <a href="<?= e(UNFUG_PATH) ?>">Grober Unfug</a> erscheinen automatisch.</p></div>
     <div class="d-flex flex-wrap gap-2">
       <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#calFeedModal"><i class="bi bi-phone me-1"></i> Aufs Handy abonnieren</button>
       <?php if ($canEdit): ?><button type="button" class="btn btn-brand" data-cal-new="<?= e($today) ?>"><i class="bi bi-plus-lg me-1"></i> Termin eintragen</button><?php endif; ?>
@@ -198,7 +200,7 @@ require __DIR__ . '/includes/header.php';
                   <?php if ($entry['attire'] !== ''): ?><span class="d-block small cal-list-note"><i class="bi bi-person-standing me-1"></i><?= e($entry['attire']) ?></span><?php endif; ?>
                   <?php if ($entry['bring'] !== ''): ?><span class="d-block small cal-list-note"><i class="bi bi-bag me-1"></i><?= e($entry['bring']) ?></span><?php endif; ?>
                   <?php if ($entry['note'] !== ''): ?><span class="d-block small text-secondary cal-list-note"><?= e($entry['note']) ?></span><?php endif; ?>
-                  <span class="d-block small text-secondary">Eingetragen von <?= e($entry['author']) ?></span>
+                  <span class="d-block small text-secondary"><?= $entry['kind'] === 'unfug' ? e($entry['endDate'] !== '' ? 'bis ' . calendar_date_label($entry['endDate']) . ' · Grober Unfug' : 'Grober Unfug') : 'Eingetragen von ' . e($entry['author']) ?></span>
                 </span>
               </button></li>
             <?php endforeach; ?>
@@ -235,10 +237,11 @@ require __DIR__ . '/includes/header.php';
       <div class="col-12" data-free><label class="form-label small" for="calTitle">Name des Termins</label><input class="form-control" id="calTitle" name="title" maxlength="160" required placeholder="z. B. Kirmesumzug"></div>
       <div class="col-12" data-free><span class="form-label small d-block">Kategorie</span>
         <div class="cal-cat-picker">
-          <?php foreach (CALENDAR_CATEGORIES as $cat => $info): ?>
+          <?php foreach (calendar_manual_categories() as $cat => $info): ?>
             <label class="cal-cat-option" style="<?= e($chipStyle($cat)) ?>"><input type="radio" name="category" value="<?= e($cat) ?>" required><span><?= e($info['label']) ?></span></label>
           <?php endforeach; ?>
         </div>
+        <small class="text-secondary d-block mt-1">Grober Ausflug, Weihnachtsfeier und Reisen trägt die Orga bei <a href="<?= e(UNFUG_PATH) ?>">Grober Unfug</a> ein, sie erscheinen dann automatisch hier.</small>
       </div>
       <div class="col-12 col-sm-6" data-free><label class="form-label small" for="calDate">Datum</label><input type="date" class="form-control" id="calDate" name="event_date" required></div>
       <div class="col-6 col-sm-3" data-free><label class="form-label small" for="calStart">Von</label><input type="time" class="form-control" id="calStart" name="start_time"></div>
@@ -307,13 +310,14 @@ require __DIR__ . '/includes/header.php';
     body.append(badge(x.category));
     body.append(row('bi-calendar3', 'Datum', x.dateLabel), row('bi-clock', 'Uhrzeit', x.timeLabel));
     if (x.location) body.append(row('bi-geo-alt', 'Ort', x.location));
-    body.append(row('bi-person', 'Eingetragen von', x.author));
+    if (x.kind !== 'unfug') body.append(row('bi-person', 'Eingetragen von', x.author));
     if (x.attire) body.append(row('bi-person-standing', 'Was anziehen?', x.attire));
     if (x.bring) body.append(row('bi-bag', 'Was mitbringen?', x.bring));
     if (x.note) body.append(row('bi-chat-left-text', 'Bemerkung', x.note));
     if (x.kind === 'meeting') body.append(el('p', 'small text-secondary mt-3 mb-0', 'Kommt automatisch aus dem Stammtisch.'));
     if (x.source === 'assembly') body.append(el('p', 'small text-secondary mt-3 mb-0', 'Kommt automatisch aus dem Antreten.'));
-    if (x.link) { const a = el('a', 'btn btn-outline-secondary me-auto', x.kind === 'meeting' ? 'Zum Stammtisch' : 'Zum Antreten'); a.href = x.link; footer.append(a); }
+    if (x.kind === 'unfug') body.append(el('p', 'small text-secondary mt-3 mb-0', 'Kommt automatisch aus Grober Unfug. Zu- und Absage, Ablauf und Kasse stehen beim Event.'));
+    if (x.link) { const a = el('a', 'btn me-auto ' + (x.kind === 'unfug' ? 'btn-brand' : 'btn-outline-secondary'), {meeting: 'Zum Stammtisch', unfug: 'Zum Event'}[x.kind] || 'Zum Antreten'); a.href = x.link; footer.append(a); }
     if (x.editable) {
       const del = el('button', 'btn btn-outline-danger', 'Löschen'); del.type = 'button';
       del.onclick = () => { if (!confirm('Termin „' + x.title + '“ wirklich löschen?')) return; const f = document.getElementById('calDeleteForm'); f.elements.namedItem('id').value = x.id; f.submit(); };

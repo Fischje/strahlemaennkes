@@ -1,5 +1,12 @@
 # Changelog
 
+## Beta 0.7.50 – 18.11.2026
+
+- Kalender: Die Events von Grober Unfug erscheinen automatisch, auch im Kalender-Abo. Ein Tipp darauf führt mit „Zum Event“ zur Zu- und Absage.
+- Reisen stehen über alle Tage im Kalender und im Abo als ein Termin von–bis.
+- Neue Farben: Grober Ausflug in Koralle, dazu die Kategorien „Reise“ (Petrol) und „Grober Unfug“ (Pink).
+- Grober Ausflug, Weihnachtsfeier und Reisen werden jetzt bei Grober Unfug eingetragen und nicht mehr von Hand im Kalender.
+
 ## Beta 0.7.49 – 18.11.2026
 
 - Grober Unfug ist jetzt Teil der App: Menü Info → Grober Unfug. Man bleibt dabei angemeldet, auch in der installierten App.
