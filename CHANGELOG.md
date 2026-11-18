@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.51 – 18.11.2026
+
+- Kalender: Events von Grober Unfug erscheinen erst, wenn die Orga sie veröffentlicht hat.
+- Die Kalender-Kategorie „Grober Unfug“ entfällt.
+
 ## Beta 0.7.50 – 18.11.2026
 
 - Kalender: Die Events von Grober Unfug erscheinen automatisch, auch im Kalender-Abo. Ein Tipp darauf führt mit „Zum Event“ zur Zu- und Absage.

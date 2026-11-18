@@ -12,13 +12,12 @@ const CALENDAR_CATEGORIES = [
     'ausflug'         => ['label' => 'Grober Ausflug',   'color' => '#FF7A66', 'text' => '#212429'],
     'weihnachtsfeier' => ['label' => 'Weihnachtsfeier',  'color' => '#8B0000', 'text' => '#FFFFFF'],
     'reise'           => ['label' => 'Reise',            'color' => '#0E7C8A', 'text' => '#FFFFFF'],
-    'unfug'           => ['label' => 'Grober Unfug',     'color' => '#FF3D8B', 'text' => '#212429'],
 ];
 /**
  * Diese Kategorien kommen nur aus den Events von Grober Unfug (Schema grober_unfug, Seite /grober-unfug/)
  * und lassen sich hier nicht von Hand wählen. Zuordnung der Unfug-Arten in calendar_union_sql().
  */
-const CALENDAR_UNFUG_CATEGORIES = ['ausflug', 'weihnachtsfeier', 'reise', 'unfug'];
+const CALENDAR_UNFUG_CATEGORIES = ['ausflug', 'weihnachtsfeier', 'reise'];
 
 /** Kategorien, die man beim Eintragen auswählen kann. */
 function calendar_manual_categories(): array {
@@ -34,7 +33,7 @@ function can_edit_calendar(PDO $pdo, ?array $user=null): bool {
 
 /**
  * Alle Kalendereinträge als eine Abfrage: eigene Termine, festgelegte Stammtische und – wenn lesbar – die Events
- * von Grober Unfug. Mehrtägige Unfug-Events (Reisen) liefern eine Zeile pro Tag; day_no zählt die Tage ab 0,
+ * von Grober Unfug (nur veröffentlichte, Entwürfe sieht nur deren Orga dort). Mehrtägige Unfug-Events (Reisen) liefern eine Zeile pro Tag; day_no zählt die Tage ab 0,
  * end_date ist der letzte Tag. Fehlt das Schema grober_unfug oder das Leserecht, fehlen nur diese Events.
  */
 function calendar_union_sql(PDO $pdo): string {
@@ -59,7 +58,7 @@ SQL;
 
 UNION ALL
 SELECT 'unfug', g.id, g.title,
-       CASE g.type WHEN 'sommer' THEN 'ausflug' WHEN 'weihnacht' THEN 'weihnachtsfeier' WHEN 'reise' THEN 'reise' ELSE 'unfug' END,
+       CASE g.type WHEN 'weihnacht' THEN 'weihnachtsfeier' WHEN 'reise' THEN 'reise' ELSE 'ausflug' END,
        d.day::date,
        CASE WHEN d.day::date = g.starts_on THEN NULLIF(g.start_time,'')::time END,
        NULL::time, g.location, g.tagline, '', '', 'unfug',
@@ -67,6 +66,7 @@ SELECT 'unfug', g.id, g.title,
        COALESCE(g.ends_on, g.starts_on), (d.day::date - g.starts_on)
 FROM grober_unfug.events g
 CROSS JOIN LATERAL generate_series(g.starts_on, COALESCE(g.ends_on, g.starts_on), INTERVAL '1 day') AS d(day)
+WHERE g.published = 1
 SQL;
     }
     return $sql;
@@ -81,6 +81,8 @@ function calendar_unfug_available(PDO $pdo): bool {
             WHEN NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='grober_unfug') THEN false
             WHEN NOT has_schema_privilege('grober_unfug','USAGE') THEN false
             WHEN to_regclass('grober_unfug.events') IS NULL THEN false
+            WHEN NOT EXISTS (SELECT 1 FROM information_schema.columns
+                             WHERE table_schema='grober_unfug' AND table_name='events' AND column_name='published') THEN false
             ELSE has_table_privilege('grober_unfug.events','SELECT') END")->fetchColumn();
     } catch (Throwable $e) {
         $ok = false;
