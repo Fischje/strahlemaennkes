@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.52 – 18.11.2026
+
+- Übersicht: Das nächste Event von Grober Unfug steht als Karte da, mit Banner, deiner Antwort, Frist und Beitrag.
+- Unten in der Leiste gibt es einen fünften Knopf „Unfug“.
+- Neue Mitteilungs-Kategorie „Grober Unfug“ (unter Einstellungen abschaltbar): neue Events, Frist läuft ab, Beitrag noch offen.
+
 ## Beta 0.7.51 – 18.11.2026
 
 - Kalender: Events von Grober Unfug erscheinen erst, wenn die Orga sie veröffentlicht hat.

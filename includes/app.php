@@ -14,6 +14,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/push.php';
 require_once __DIR__ . '/site-images.php';
+require_once __DIR__ . '/unfug.php';
 
 function e(?string $value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 
@@ -341,8 +342,9 @@ function is_unfug_only(?array $user=null): bool {
 function enforce_unfug_only(): void {
     if (PHP_SAPI === 'cli' || !is_unfug_only()) return;
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-    if ($path === '/logout.php') return;
-    if (str_starts_with($path, '/api/') || str_starts_with($path, '/push-')) { http_response_code(403); exit; }
+    // Abmelden und Push (Mitteilungen von Grober Unfug) dürfen sie benutzen.
+    if (in_array($path, ['/logout.php', '/push-key.php', '/push-subscribe.php', '/push-unsubscribe.php'], true)) return;
+    if (str_starts_with($path, '/api/')) { http_response_code(403); exit; }
     redirect(UNFUG_PATH);
 }
 

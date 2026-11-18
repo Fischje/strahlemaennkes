@@ -359,3 +359,8 @@ body::after { content:""; position:fixed; top:0; bottom:0; left:50%; width:min(1
 .chronik-group-photo { margin:0; padding:0; overflow:hidden; }
 .chronik-group-photo img { display:block; width:100%; height:auto; }
 .chronik-group-photo figcaption { padding:.6rem 1rem; font-size:.9rem; color:var(--sm-muted); text-align:center; }
+
+/* Übersicht: Karte „Nächstes Unfug-Event“ (Farbe der Event-Art als Streifen links, Werbebanner oben). */
+.dashboard-unfug { border-left:5px solid var(--unfug-c, #FF7A66); overflow:hidden; }
+.dashboard-unfug-banner { display:block; width:100%; max-height:220px; object-fit:cover; }
+.mobile-bottom-nav a span { white-space:nowrap; }

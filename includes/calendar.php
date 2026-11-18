@@ -52,7 +52,7 @@ SELECT 'meeting', m.id, m.title, 'zugtreffen',
 FROM meetings m LEFT JOIN users c ON c.id=m.created_by
 WHERE m.status IN ('scheduled','running','completed') AND m.starts_at_utc IS NOT NULL
 SQL;
-    if (calendar_unfug_available($pdo)) {
+    if (unfug_available($pdo)) {
         // Grober Unfug speichert Ortszeit, hier wird mit UTC gerechnet (changed_at).
         $sql .= <<<'SQL'
 
@@ -72,23 +72,6 @@ SQL;
     return $sql;
 }
 
-/** Ob die Events von Grober Unfug lesbar sind (Schema da, Rechte gesetzt, siehe grober-unfug/bin/datenbank-rechte.sql). */
-function calendar_unfug_available(PDO $pdo): bool {
-    static $ok = null;
-    if ($ok !== null) return $ok;
-    try {
-        $ok = (bool)$pdo->query("SELECT CASE
-            WHEN NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='grober_unfug') THEN false
-            WHEN NOT has_schema_privilege('grober_unfug','USAGE') THEN false
-            WHEN to_regclass('grober_unfug.events') IS NULL THEN false
-            WHEN NOT EXISTS (SELECT 1 FROM information_schema.columns
-                             WHERE table_schema='grober_unfug' AND table_name='events' AND column_name='published') THEN false
-            ELSE has_table_privilege('grober_unfug.events','SELECT') END")->fetchColumn();
-    } catch (Throwable $e) {
-        $ok = false;
-    }
-    return $ok;
-}
 const CALENDAR_ORDER_SQL = ' ORDER BY event_date, start_time NULLS FIRST, title, kind, id';
 
 /** Einträge zwischen zwei Tagen (jeweils einschließlich, Format Y-m-d). */

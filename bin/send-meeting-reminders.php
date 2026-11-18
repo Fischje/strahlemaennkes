@@ -36,3 +36,6 @@ foreach($rows as $m){
         $mark((int)$m['id'],'reminder_sent_at');echo 'Erinnerung '.$m['id'].PHP_EOL;
     }
 }
+
+// Grober Unfug: Benachrichtigungen der Orga und Erinnerungen (Frist, Beitrag).
+try { unfug_push_run($pdo, $now); } catch (Throwable $e) { echo 'Grober Unfug: '.$e->getMessage().PHP_EOL; }

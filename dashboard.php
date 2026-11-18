@@ -3,6 +3,7 @@ require_once __DIR__ . '/includes/app.php';
 $u = require_login();
 
 $isOpsDashboard = can_act_as_spiess($pdo,$u) || is_leader();
+$unfug = unfug_next_event($pdo, (int)$u['id']);
 
 $activeMembers = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1 AND unfug_only=0")->fetchColumn();
 $chosenCount = (int)$pdo->query("
@@ -135,6 +136,29 @@ require __DIR__.'/includes/header.php';
               <?php endif; ?>
             </div>
             <a class="btn btn-sm btn-outline-secondary" href="/stammtisch.php"><?= $activeMeeting['status']==='poll'?'Abstimmen':'Ansehen' ?></a>
+          </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if($unfug):
+          $unfugUrl = UNFUG_PATH.'event.php?id='.(int)$unfug['id'];
+          $unfugOpen = $unfug['deadline'] === null || strtotime((string)$unfug['deadline']) > time(); ?>
+        <div class="panel mb-4 dashboard-unfug" style="--unfug-c:<?= e(UNFUG_TYPE_COLORS[$unfug['type']] ?? '#FF7A66') ?>">
+          <?php if($unfug['banner_id']): ?><a href="<?= e($unfugUrl) ?>"><img class="dashboard-unfug-banner" src="<?= e(UNFUG_PATH.'bild.php?id='.(int)$unfug['banner_id'].'&g=g') ?>" alt="<?= e($unfug['title']) ?>" loading="lazy"></a><?php endif; ?>
+          <div class="p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <div class="small text-secondary"><i class="bi bi-emoji-laughing me-1"></i>Nächstes Unfug-Event · <?= e(UNFUG_TYPE_LABELS[$unfug['type']] ?? 'Event') ?></div>
+              <h2 class="h5 fw-bold mb-1 mt-1"><?= e($unfug['title']) ?></h2>
+              <div class="small text-secondary"><?= e(unfug_when($unfug)) ?><?= $unfug['location'] ? ' · '.e($unfug['location']) : '' ?></div>
+              <div class="mt-2 d-flex flex-wrap gap-1">
+                <?php if($unfug['status']==='yes'): ?><span class="badge text-bg-success">Du bist dabei</span>
+                <?php elseif($unfug['status']==='no'): ?><span class="badge text-bg-secondary">Nicht dabei</span>
+                <?php else: ?><span class="badge text-bg-warning">Antwort fehlt noch</span><?php endif; ?>
+                <?php if($unfug['deadline'] && $unfugOpen): ?><span class="badge text-bg-light border">Frist <?= e(date('d.m.', strtotime((string)$unfug['deadline']))) ?></span><?php endif; ?>
+                <?php if($unfug['fee_cents'] !== null && $unfug['status']==='yes'): ?><span class="badge <?= (int)$unfug['paid'] ? 'text-bg-success' : 'text-bg-danger' ?>">Beitrag <?= (int)$unfug['paid'] ? 'bezahlt' : 'offen' ?></span><?php endif; ?>
+              </div>
+            </div>
+            <a class="btn btn-brand" href="<?= e($unfugUrl) ?>"><?= !$unfug['status'] && $unfugOpen ? 'Zu- oder absagen' : 'Zum Event' ?></a>
           </div>
         </div>
         <?php endif; ?>

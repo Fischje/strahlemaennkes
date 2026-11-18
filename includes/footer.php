@@ -5,7 +5,7 @@
 <?php
   // Feste Schnellwahl am Handy/in der App; alles Weitere steht im Menü oben.
   $bottomPath=parse_url($_SERVER['REQUEST_URI'] ?? '/',PHP_URL_PATH) ?: '/';
-  foreach([['/dashboard.php','bi-house-door','Übersicht'],['/member-drink.php','bi-cup-straw','Mein Getränk'],['/theke.php','bi-list-check','Theke'],['/calendar.php','bi-calendar-event','Kalender']] as [$href,$icon,$label]):
+  foreach([['/dashboard.php','bi-house-door','Übersicht'],['/member-drink.php','bi-cup-straw','Mein Getränk'],['/theke.php','bi-list-check','Theke'],['/calendar.php','bi-calendar-event','Kalender'],[UNFUG_PATH,'bi-emoji-laughing','Unfug']] as [$href,$icon,$label]):
     $here=$bottomPath===$href; ?>
   <a href="<?= $href ?>" class="<?= $here ? 'active' : '' ?>" <?= $here ? 'aria-current="page"' : '' ?>><i class="bi <?= $icon ?>"></i><span><?= $label ?></span></a>
 <?php endforeach; ?>

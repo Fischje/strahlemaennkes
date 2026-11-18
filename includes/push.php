@@ -12,6 +12,7 @@ function push_categories(): array
         'sektbar'    => ['Sektbar', 'Wenn der Sektbarmodus startet.'],
         'getraenke'  => ['Getränke', 'Erinnerung zur Getränkewahl und Hinweise zu Getränkewechseln.'],
         'runden'     => ['Runden', 'Wenn du eine Runde holen sollst oder eine Runde als gegeben markiert wurde.'],
+        'unfug'      => ['Grober Unfug', 'Neue Events, Frist für die Zusage läuft ab, Beitrag noch offen.'],
     ];
 }
 
@@ -55,7 +56,7 @@ function push_deliver(PDO $pdo, string $whereSql, array $params, string $categor
             FROM push_subscriptions s
             JOIN users u ON u.id=s.user_id
             LEFT JOIN user_drink_preferences p ON p.user_id=u.id
-            WHERE u.is_active=1 AND u.unfug_only=0" . $whereSql . push_category_filter($category) . "
+            WHERE u.is_active=1" . ($category === 'unfug' ? '' : ' AND u.unfug_only=0') . $whereSql . push_category_filter($category) . "
             ORDER BY s.id";
     if ($category !== '') $params[] = $category;
     $st = $pdo->prepare($sql);
