@@ -326,12 +326,24 @@ function password_rule_help(): string {
     return password_rule_text().' Erlaubte Sonderzeichen: '.password_allowed_specials();
 }
 
-/** Adresse von Grober Unfug (Ziel für Konten mit Zugang „nur Grober Unfug“). */
-const UNFUG_URL = 'https://unfug.thekenbrasilianer.de';
+/**
+ * Grober Unfug läuft unter /grober-unfug/ (eigenes Repo, eigene Caddy-Route) mit derselben Sitzung und demselben
+ * „eingeloggt bleiben“. Konten „nur Grober Unfug“ landen nach der Anmeldung dort und sehen sonst nichts von hier.
+ */
+const UNFUG_PATH = '/grober-unfug/';
 
-/** Hinweis für Konten, die nur Grober Unfug nutzen dürfen. */
-function unfug_only_message(): string {
-    return 'Dein Zugang gilt nur für Grober Unfug. Bitte dort anmelden: '.parse_url(UNFUG_URL, PHP_URL_HOST);
+function is_unfug_only(?array $user=null): bool {
+    $user = $user ?: current_user();
+    return $user && (int)($user['unfug_only'] ?? 0) === 1;
+}
+
+/** Konten „nur Grober Unfug“ von allen Seiten hier nach Grober Unfug schicken (Abmelden ausgenommen). */
+function enforce_unfug_only(): void {
+    if (PHP_SAPI === 'cli' || !is_unfug_only()) return;
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    if ($path === '/logout.php') return;
+    if (str_starts_with($path, '/api/') || str_starts_with($path, '/push-')) { http_response_code(403); exit; }
+    redirect(UNFUG_PATH);
 }
 
 /** Die Felder des Benutzers, die in der Sitzung gehalten werden. */
@@ -346,6 +358,7 @@ function session_user_from_row(array $user): array {
         'is_leader'=>(int)($user['is_leader'] ?? 0),
         'is_secretary'=>(int)($user['is_secretary'] ?? 0),
         'must_change_password'=>(int)($user['must_change_password'] ?? 0),
+        'unfug_only'=>(int)($user['unfug_only'] ?? 0),
     ];
 }
 
@@ -364,13 +377,6 @@ function refresh_session_user(PDO $pdo): void {
     $st = $pdo->prepare('SELECT * FROM users WHERE id=?');
     $st->execute([(int)$u['id']]);
     $row = $st->fetch();
-    if ($row && (int)$row['is_active'] === 1 && (int)($row['unfug_only'] ?? 0) === 1) {
-        clear_remember_login($pdo);
-        $_SESSION = [];
-        session_regenerate_id(true);
-        flash('warning', unfug_only_message());
-        return;
-    }
     if (!$row || (int)$row['is_active'] !== 1) {
         clear_remember_login($pdo);
         $_SESSION = [];
@@ -507,7 +513,7 @@ function restore_remember_login(PDO $pdo): void {
         JOIN users u ON u.id=r.user_id
         WHERE r.token_hash=?
           AND r.expires_at > CURRENT_TIMESTAMP
-          AND u.is_active=1 AND u.unfug_only=0
+          AND u.is_active=1
         LIMIT 1
     ');
     $st->execute([$hash]);
@@ -808,3 +814,4 @@ function send_email_changed_mail(string $oldEmail, string $name, string $newEmai
 restore_remember_login($pdo);
 refresh_session_user($pdo);
 enforce_domain_move();
+enforce_unfug_only();

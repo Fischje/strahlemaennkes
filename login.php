@@ -13,11 +13,6 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   $stmt=$pdo->prepare('SELECT * FROM users WHERE (LOWER(username)=LOWER(?) OR LOWER(email)=LOWER(?)) AND is_active=1 LIMIT 1');
   $stmt->execute([$login,$login]);
   $user=$stmt->fetch();
-  if($user && password_verify($password,$user['password_hash']) && (int)($user['unfug_only']??0)===1){
-    login_clear_failures($pdo,$login);
-    flash('warning',unfug_only_message());
-    redirect('/login.php');
-  }
   if($user && password_verify($password,$user['password_hash'])){
     login_clear_failures($pdo,$login);
     login_user($user);
@@ -26,12 +21,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       // Startpasswort: noch keinen dauerhaften Login-Token anlegen.
       clear_remember_login($pdo);
       $_SESSION['remember_after_password_change']=$remember ? 1 : 0;
-      redirect('/first-login-password.php');
+      // „nur Grober Unfug“: Startpasswort im Grober-Unfug-Design ersetzen.
+      redirect(is_unfug_only($user) ? UNFUG_PATH.'passwort-neu.php' : '/first-login-password.php');
     }
 
     if($remember) create_remember_login($pdo, (int)$user['id']);
     else clear_remember_login($pdo);
-    redirect('/dashboard.php');
+    redirect(is_unfug_only($user) ? UNFUG_PATH : '/dashboard.php');
   }
   if($login!=='') login_record_failure($pdo,$login);
   flash('danger','Benutzername/E-Mail oder Passwort ist falsch.'); redirect('/login.php');

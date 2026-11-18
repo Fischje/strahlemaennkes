@@ -82,6 +82,7 @@ header('Pragma: no-cache');
                 ['/protokolle.php','bi-journal-text','Protokolle'],
                 ['/members.php','bi-people','Mitglieder'],
                 ['/cash.php','bi-cash-coin','Kasse'],
+                [UNFUG_PATH,'bi-emoji-laughing','Grober Unfug'],
               ]],
             ];
             $functionItems=function_menu_items($pdo,$u);

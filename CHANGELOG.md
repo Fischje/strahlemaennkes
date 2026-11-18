@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 0.7.49 – 18.11.2026
+
+- Grober Unfug ist jetzt Teil der App: Menü Info → Grober Unfug. Man bleibt dabei angemeldet, auch in der installierten App.
+- Abmelden bei Grober Unfug meldet auch hier ab, und umgekehrt.
+- Konten „nur Grober Unfug“ können sich hier anmelden und landen direkt bei Grober Unfug.
+
 ## Beta 0.7.48 – 18.11.2026
 
 - Mitglieder: Neue Zugangsart „nur Grober Unfug“ für Freunde, die nicht zum Zug gehören. Solche Konten nutzen nur die Seite Grober Unfug und tauchen in Strahlemännkes nirgends auf – nicht an der Theke, nicht beim Stammtisch, nicht in der Mitgliederliste, nicht in der Statistik.
