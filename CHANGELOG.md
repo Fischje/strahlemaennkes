@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.53 – 18.11.2026
+
+- Gelbe Stammtisch-Zeile: Während der Terminfindung erscheint sie nur noch, solange deine Stimme fehlt. Wer abgestimmt hat, sieht sie nicht mehr.
+
 ## Beta 0.7.52 – 18.11.2026
 
 - Übersicht: Das nächste Event von Grober Unfug steht als Karte da, mit Banner, deiner Antwort, Frist und Beitrag.
