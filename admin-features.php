@@ -47,7 +47,7 @@ $pageTitle='Funktionen';require __DIR__.'/includes/header.php';
  $mq=$pdo->prepare("SELECT u.first_name || ' ' || substr(u.last_name,1,1) || '.' AS name,
    EXISTS(SELECT 1 FROM push_subscriptions s WHERE s.user_id=u.id AND s.origin_host=?) AS on_new,
    EXISTS(SELECT 1 FROM push_subscriptions s WHERE s.user_id=u.id".$legacyCond.") AS on_old
-   FROM users u WHERE u.is_active=1 ORDER BY u.last_name,u.first_name");
+   FROM users u WHERE u.is_active=1 AND u.unfug_only=0 ORDER BY u.last_name,u.first_name");
  $mq->execute(array_merge([app_canonical_host()],$lp));
  $moveGroups=['new'=>[],'old'=>[],'none'=>[]];
  foreach($mq->fetchAll() as $row) $moveGroups[$row['on_new']?'new':($row['on_old']?'old':'none')][]=$row['name'];

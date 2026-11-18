@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/calendar.php';
 $token = (string)($_GET['t'] ?? '');
 $userId = false;
 if (preg_match('/^[0-9a-f]{64}$/', $token)) {
-    $q = $pdo->prepare('SELECT t.user_id FROM calendar_feed_tokens t JOIN users u ON u.id=t.user_id AND u.is_active=1 WHERE t.token=?');
+    $q = $pdo->prepare('SELECT t.user_id FROM calendar_feed_tokens t JOIN users u ON u.id=t.user_id AND u.is_active=1 AND u.unfug_only=0 WHERE t.token=?');
     $q->execute([$token]);
     $userId = $q->fetchColumn();
 }

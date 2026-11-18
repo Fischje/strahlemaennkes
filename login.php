@@ -13,6 +13,11 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   $stmt=$pdo->prepare('SELECT * FROM users WHERE (LOWER(username)=LOWER(?) OR LOWER(email)=LOWER(?)) AND is_active=1 LIMIT 1');
   $stmt->execute([$login,$login]);
   $user=$stmt->fetch();
+  if($user && password_verify($password,$user['password_hash']) && (int)($user['unfug_only']??0)===1){
+    login_clear_failures($pdo,$login);
+    flash('warning',unfug_only_message());
+    redirect('/login.php');
+  }
   if($user && password_verify($password,$user['password_hash'])){
     login_clear_failures($pdo,$login);
     login_user($user);

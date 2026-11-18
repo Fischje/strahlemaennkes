@@ -16,7 +16,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $st=$pdo->prepare("
             SELECT id,first_name,last_name,role
             FROM users
-            WHERE id=? AND is_active=1
+            WHERE id=? AND is_active=1 AND unfug_only=0
         ");
         $st->execute([$representativeId]);
         $rep=$st->fetch();
@@ -70,7 +70,7 @@ $active=active_spiess_delegation($pdo);
 $members=$pdo->query("
     SELECT id,first_name,last_name,role,is_treasurer,is_leader,is_secretary
     FROM users
-    WHERE is_active=1 AND role NOT IN ('spiess','admin')
+    WHERE is_active=1 AND unfug_only=0 AND role NOT IN ('spiess','admin')
     ORDER BY last_name,first_name
 ")->fetchAll();
 

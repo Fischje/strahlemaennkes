@@ -4,7 +4,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();
     $email=trim($_POST['email']??'');
     if(filter_var($email,FILTER_VALIDATE_EMAIL)){
-        $st=$pdo->prepare('SELECT id,first_name,last_name,email FROM users WHERE LOWER(email)=LOWER(?) AND is_active=1 LIMIT 1');
+        $st=$pdo->prepare('SELECT id,first_name,last_name,email FROM users WHERE LOWER(email)=LOWER(?) AND is_active=1 AND unfug_only=0 LIMIT 1');
         $st->execute([$email]);
         $user=$st->fetch();
         if($user){

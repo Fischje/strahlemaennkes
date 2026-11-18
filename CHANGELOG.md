@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 0.7.48 – 18.11.2026
+
+- Mitglieder: Neue Zugangsart „nur Grober Unfug“ für Freunde, die nicht zum Zug gehören. Solche Konten nutzen nur die Seite Grober Unfug und tauchen in Strahlemännkes nirgends auf – nicht an der Theke, nicht beim Stammtisch, nicht in der Mitgliederliste, nicht in der Statistik.
+- Im Fenster „Mitglied bearbeiten“ gibt es dafür das Feld „Zugang“. Rolle und Ämter entfallen bei „nur Grober Unfug“.
+
 ## Beta 0.7.47 – 08.11.2026
 
 - Protokoll-Archiv: Die Änderungshistorie unter einem Protokoll zeigt nur noch, wann und von wem es abgeschlossen oder wieder geöffnet wurde – auf Deutsch statt mit technischen Begriffen.

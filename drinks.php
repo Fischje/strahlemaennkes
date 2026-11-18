@@ -75,7 +75,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $memberId=(int)($_POST['member_id']??0);
         $drinkValue=$_POST['drink_id']??'';
 
-        $st=$pdo->prepare("SELECT id,first_name,last_name FROM users WHERE id=? AND is_active=1");
+        $st=$pdo->prepare("SELECT id,first_name,last_name FROM users WHERE id=? AND is_active=1 AND unfug_only=0");
         $st->execute([$memberId]);
         $member=$st->fetch();
         if(!$member){
@@ -127,9 +127,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     if($action==='remind'){
         $target=($_POST['target']??'')==='without'?'members_without_choice':'all_members';
         if($target==='members_without_choice'){
-            $count=(int)$pdo->query("SELECT COUNT(*) FROM users u LEFT JOIN user_drink_preferences p ON p.user_id=u.id WHERE u.is_active=1 AND (p.drink_id IS NULL OR p.user_id IS NULL)")->fetchColumn();
+            $count=(int)$pdo->query("SELECT COUNT(*) FROM users u LEFT JOIN user_drink_preferences p ON p.user_id=u.id WHERE u.is_active=1 AND u.unfug_only=0 AND (p.drink_id IS NULL OR p.user_id IS NULL)")->fetchColumn();
         } else {
-            $count=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
+            $count=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1 AND unfug_only=0")->fetchColumn();
         }
         $message='Bitte prüfe deinen aktuellen Getränkewunsch und wähle dein Getränk für die nächste Runde.';
         $pdo->prepare("INSERT INTO drink_reminders(sent_by,target,message,recipients_count) VALUES(?,?,?,?)")->execute([$u['id'],$target,$message,$count]);
@@ -155,7 +155,7 @@ $membersForDrink=$pdo->query("
     FROM users u
     LEFT JOIN user_drink_preferences p ON p.user_id=u.id
     LEFT JOIN drinks d ON d.id=p.drink_id
-    WHERE u.is_active=1
+    WHERE u.is_active=1 AND u.unfug_only=0
     ORDER BY u.last_name,u.first_name
 ")->fetchAll();
 
@@ -167,8 +167,8 @@ $approvedDrinks=$pdo->query("
 ")->fetchAll();
 
 $drinks=$pdo->query("SELECT d.*,u.first_name,u.last_name FROM drinks d LEFT JOIN users u ON u.id=d.created_by ORDER BY d.is_approved ASC,d.is_active DESC,d.sort_order,d.name")->fetchAll();
-$status=$pdo->query("SELECT d.id,d.name,d.emoji,COUNT(*) qty FROM user_drink_preferences p JOIN users u ON u.id=p.user_id AND u.is_active=1 JOIN drinks d ON d.id=p.drink_id GROUP BY d.id,d.name,d.emoji ORDER BY qty DESC,d.sort_order")->fetchAll();
-$active=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
+$status=$pdo->query("SELECT d.id,d.name,d.emoji,COUNT(*) qty FROM user_drink_preferences p JOIN users u ON u.id=p.user_id AND u.is_active=1 AND u.unfug_only=0 JOIN drinks d ON d.id=p.drink_id GROUP BY d.id,d.name,d.emoji ORDER BY qty DESC,d.sort_order")->fetchAll();
+$active=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1 AND unfug_only=0")->fetchColumn();
 $chosen=array_sum(array_map(fn($r)=>(int)$r['qty'],$status));
 $pageTitle='Getränke verwalten'; require __DIR__.'/includes/header.php';
 ?>

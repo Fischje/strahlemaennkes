@@ -4,12 +4,12 @@ $u = require_login();
 
 $isOpsDashboard = can_act_as_spiess($pdo,$u) || is_leader();
 
-$activeMembers = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
+$activeMembers = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1 AND unfug_only=0")->fetchColumn();
 $chosenCount = (int)$pdo->query("
     SELECT COUNT(*)
     FROM user_drink_preferences p
     JOIN users u ON u.id=p.user_id
-    WHERE u.is_active=1 AND p.drink_id IS NOT NULL
+    WHERE u.is_active=1 AND u.unfug_only=0 AND p.drink_id IS NOT NULL
 ")->fetchColumn();
 
 $fineStats = $pdo->query("

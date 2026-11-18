@@ -20,7 +20,7 @@ $ids=array_column($filtered,'id');
 $rows=[];
 if($total){
     $in=implode(',',array_map('intval',$ids));
-    $users=$pdo->query("SELECT u.id,TRIM(u.first_name||' '||u.last_name) AS name,u.is_active FROM users u ORDER BY u.last_name,u.first_name")->fetchAll();
+    $users=$pdo->query("SELECT u.id,TRIM(u.first_name||' '||u.last_name) AS name,u.is_active FROM users u WHERE u.unfug_only=0 ORDER BY u.last_name,u.first_name")->fetchAll();
     $att=[];$last=[];
     foreach($pdo->query("SELECT a.user_id,m.starts_at_utc FROM meeting_attendees a JOIN meetings m ON m.id=a.meeting_id WHERE a.meeting_id IN ($in)")->fetchAll() as $r){
         $att[(int)$r['user_id']]=($att[(int)$r['user_id']]??0)+1;

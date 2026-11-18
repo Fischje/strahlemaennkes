@@ -182,7 +182,7 @@ $rounds=$pdo->query("
 ")->fetchAll();
 
 $members=$canManage
-    ? $pdo->query("SELECT id,first_name,last_name FROM users WHERE is_active=1 ORDER BY last_name,first_name")->fetchAll()
+    ? $pdo->query("SELECT id,first_name,last_name FROM users WHERE is_active=1 AND unfug_only=0 ORDER BY last_name,first_name")->fetchAll()
     : [];
 
 $openRounds=0;

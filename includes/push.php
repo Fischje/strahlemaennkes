@@ -55,7 +55,7 @@ function push_deliver(PDO $pdo, string $whereSql, array $params, string $categor
             FROM push_subscriptions s
             JOIN users u ON u.id=s.user_id
             LEFT JOIN user_drink_preferences p ON p.user_id=u.id
-            WHERE u.is_active=1" . $whereSql . push_category_filter($category) . "
+            WHERE u.is_active=1 AND u.unfug_only=0" . $whereSql . push_category_filter($category) . "
             ORDER BY s.id";
     if ($category !== '') $params[] = $category;
     $st = $pdo->prepare($sql);

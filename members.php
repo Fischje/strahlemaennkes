@@ -19,6 +19,10 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $leader=!empty($_POST['is_leader']) ? 1 : 0;
         $secretary=!empty($_POST['is_secretary']) ? 1 : 0;
         $password=$_POST['password']??'';
+        // Zugang „nur Grober Unfug“: kein Strahlemännkes, daher auch keine Rolle und keine Ämter.
+        $unfugOnly=($_POST['access']??'')==='unfug' ? 1 : 0;
+        if($action==='edit' && $id===(int)$u['id']) $unfugOnly=0;
+        if($unfugOnly){ $role='member'; $treasurer=0; $leader=0; $secretary=0; }
 
         if(strlen($username)<3||$first===''||$last===''||($email!==''&&!filter_var($email,FILTER_VALIDATE_EMAIL))){
             flash('danger','Bitte die Angaben prüfen.'); redirect('/members.php');
@@ -30,20 +34,20 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
         try{
             if($action==='create'){
-                $pdo->prepare("INSERT INTO users(username,email,password_hash,first_name,last_name,role,is_treasurer,is_leader,is_secretary,must_change_password) VALUES(?,?,?,?,?,?,?,?,?,1)")
-                    ->execute([$username,$email?:null,password_hash($password,PASSWORD_DEFAULT),$first,$last,$role,$treasurer,$leader,$secretary]);
+                $pdo->prepare("INSERT INTO users(username,email,password_hash,first_name,last_name,role,is_treasurer,is_leader,is_secretary,unfug_only,must_change_password) VALUES(?,?,?,?,?,?,?,?,?,?,1)")
+                    ->execute([$username,$email?:null,password_hash($password,PASSWORD_DEFAULT),$first,$last,$role,$treasurer,$leader,$secretary,$unfugOnly]);
                 flash('success','Mitglied angelegt.');
             }else{
                 // Der aktuell eingeloggte Admin darf sich nicht versehentlich selbst die Admin-Rolle entziehen.
                 if($id===$u['id']) $role='admin';
 
                 if($password!==''){
-                    $pdo->prepare("UPDATE users SET username=?,email=?,first_name=?,last_name=?,role=?,is_treasurer=?,is_leader=?,is_secretary=?,password_hash=?,must_change_password=1,updated_at=CURRENT_TIMESTAMP WHERE id=?")
-                        ->execute([$username,$email?:null,$first,$last,$role,$treasurer,$leader,$secretary,password_hash($password,PASSWORD_DEFAULT),$id]);
+                    $pdo->prepare("UPDATE users SET username=?,email=?,first_name=?,last_name=?,role=?,is_treasurer=?,is_leader=?,is_secretary=?,unfug_only=?,password_hash=?,must_change_password=1,updated_at=CURRENT_TIMESTAMP WHERE id=?")
+                        ->execute([$username,$email?:null,$first,$last,$role,$treasurer,$leader,$secretary,$unfugOnly,password_hash($password,PASSWORD_DEFAULT),$id]);
                     $pdo->prepare("DELETE FROM remember_tokens WHERE user_id=?")->execute([$id]);
                 }else{
-                    $pdo->prepare("UPDATE users SET username=?,email=?,first_name=?,last_name=?,role=?,is_treasurer=?,is_leader=?,is_secretary=?,updated_at=CURRENT_TIMESTAMP WHERE id=?")
-                        ->execute([$username,$email?:null,$first,$last,$role,$treasurer,$leader,$secretary,$id]);
+                    $pdo->prepare("UPDATE users SET username=?,email=?,first_name=?,last_name=?,role=?,is_treasurer=?,is_leader=?,is_secretary=?,unfug_only=?,updated_at=CURRENT_TIMESTAMP WHERE id=?")
+                        ->execute([$username,$email?:null,$first,$last,$role,$treasurer,$leader,$secretary,$unfugOnly,$id]);
                 }
 
                 if($id===$u['id']){
@@ -79,7 +83,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     }
 }
 
-$users=$pdo->query('SELECT id,username,email,first_name,last_name,role,is_treasurer,is_leader,is_secretary,must_change_password,is_active,created_at FROM users ORDER BY last_name,first_name')->fetchAll();
+// Konten „nur Grober Unfug“ sehen nur Administratoren (sie gehören nicht zum Zug).
+$users=$pdo->query('SELECT id,username,email,first_name,last_name,role,is_treasurer,is_leader,is_secretary,unfug_only,must_change_password,is_active,created_at FROM users'.($isAdmin?'':' WHERE unfug_only=0').' ORDER BY unfug_only,last_name,first_name')->fetchAll();
 $pageTitle='Mitglieder';
 require __DIR__.'/includes/header.php';
 ?>
@@ -131,7 +136,7 @@ require __DIR__.'/includes/header.php';
             <td><strong><?=e($m['first_name'].' '.$m['last_name'])?></strong></td>
             <td><?=e($m['username'])?></td>
             <td><?=e($m['email']?:'–')?></td>
-            <td><?=e(role_label($m['role']))?></td>
+            <td><?=(int)$m['unfug_only']?'<span class="badge text-bg-dark">nur Grober Unfug</span>':e(role_label($m['role']))?></td>
             <td><div class="d-flex flex-wrap gap-1">
               <?php if((int)$m['is_treasurer']): ?><span class="badge text-bg-success">Kassierer</span><?php endif; ?>
               <?php if((int)$m['is_leader']): ?><span class="badge text-bg-info">Zugführer</span><?php endif; ?>
@@ -146,7 +151,7 @@ require __DIR__.'/includes/header.php';
               <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#userModal" data-mode="edit"
                 data-id="<?=(int)$m['id']?>" data-username="<?=e($m['username'])?>" data-email="<?=e($m['email']??'')?>"
                 data-first="<?=e($m['first_name'])?>" data-last="<?=e($m['last_name'])?>" data-role="<?=e($m['role'])?>"
-                data-treasurer="<?=(int)$m['is_treasurer']?>" data-leader="<?=(int)$m['is_leader']?>" data-secretary="<?=(int)$m['is_secretary']?>">Bearbeiten</button>
+                data-access="<?=(int)$m['unfug_only']?'unfug':'full'?>" data-treasurer="<?=(int)$m['is_treasurer']?>" data-leader="<?=(int)$m['is_leader']?>" data-secretary="<?=(int)$m['is_secretary']?>">Bearbeiten</button>
               <?php if($m['id']!=$u['id']):?>
                 <form method="post"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?=$m['id']?>">
                   <button class="btn btn-sm <?=$m['is_active']?'btn-outline-danger':'btn-outline-success'?>"><?=$m['is_active']?'Deaktivieren':'Aktivieren'?></button>
@@ -172,13 +177,19 @@ require __DIR__.'/includes/header.php';
       <div class="col-12"><label class="form-label">Benutzername</label><input id="userUsername" name="username" class="form-control" required></div>
       <div class="col-12"><label class="form-label">E-Mail</label><input id="userEmail" type="email" name="email" class="form-control"></div>
       <div class="col-12"><label class="form-label">Start-/Resetpasswort <span id="passwordOptional" class="text-secondary small"></span></label><input type="password" name="password" id="userPassword" class="form-control" autocomplete="new-password"><div class="form-text">Als Administrator kannst du dieses Passwort frei vergeben. Es gilt nur als Start-/Resetpasswort; der Benutzer muss beim nächsten Login ein eigenes Passwort nach der normalen Kennwortrichtlinie festlegen.</div></div>
-      <div class="col-12"><label class="form-label">Rolle</label><select id="userRole" name="role" class="form-select"><option value="member">Mitglied</option><option value="spiess">Spieß / Moderator</option><option value="admin">Administrator</option></select></div>
-      <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_treasurer" value="1" id="userTreasurer"><label class="form-check-label" for="userTreasurer">Kassenrecht / Kassierer</label></div><div class="form-text">Kann Kontostand und Monatsbeitrag in der Kasse ändern. Administratoren dürfen die Kasse unabhängig davon ebenfalls bearbeiten.</div></div><div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_leader" value="1" id="userLeader"><label class="form-check-label" for="userLeader">Zugführer</label></div><div class="form-text">Darf Stammtische verwalten und die Chronik bearbeiten.</div></div><div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_secretary" value="1" id="userSecretary"><label class="form-check-label" for="userSecretary">Schriftführer</label></div><div class="form-text">Darf Stammtische und Protokolle bearbeiten sowie abgeschlossene Protokolle wieder öffnen.</div></div>
+      <div class="col-12"><label class="form-label">Zugang</label><select id="userAccess" name="access" class="form-select"><option value="full">Strahlemännkes (mit Grober Unfug)</option><option value="unfug">nur Grober Unfug</option></select><div class="form-text">„nur Grober Unfug“ ist für Freunde ohne Zugmitgliedschaft: Sie sehen nur die Seite Grober Unfug und tauchen hier sonst nirgends auf (nicht an der Theke, nicht beim Stammtisch, nicht in der Mitgliederliste).</div></div>
+      <div class="col-12" data-sm-only><label class="form-label">Rolle</label><select id="userRole" name="role" class="form-select"><option value="member">Mitglied</option><option value="spiess">Spieß / Moderator</option><option value="admin">Administrator</option></select></div>
+      <div class="col-12" data-sm-only><div class="form-check"><input class="form-check-input" type="checkbox" name="is_treasurer" value="1" id="userTreasurer"><label class="form-check-label" for="userTreasurer">Kassenrecht / Kassierer</label></div><div class="form-text">Kann Kontostand und Monatsbeitrag in der Kasse ändern. Administratoren dürfen die Kasse unabhängig davon ebenfalls bearbeiten.</div></div><div class="col-12" data-sm-only><div class="form-check"><input class="form-check-input" type="checkbox" name="is_leader" value="1" id="userLeader"><label class="form-check-label" for="userLeader">Zugführer</label></div><div class="form-text">Darf Stammtische verwalten und die Chronik bearbeiten.</div></div><div class="col-12" data-sm-only><div class="form-check"><input class="form-check-input" type="checkbox" name="is_secretary" value="1" id="userSecretary"><label class="form-check-label" for="userSecretary">Schriftführer</label></div><div class="form-text">Darf Stammtische und Protokolle bearbeiten sowie abgeschlossene Protokolle wieder öffnen.</div></div>
     </div>
   </div>
   <div class="modal-footer"><button class="btn btn-brand">Speichern</button></div>
 </form></div></div>
 <script>
+function toggleAccess(){
+  const unfug=document.getElementById('userAccess').value==='unfug';
+  document.querySelectorAll('#userModal [data-sm-only]').forEach(el=>el.classList.toggle('d-none',unfug));
+}
+document.getElementById('userAccess').addEventListener('change',toggleAccess);
 document.getElementById('userModal').addEventListener('show.bs.modal',e=>{
   const b=e.relatedTarget,edit=b?.dataset.mode==='edit';
   document.getElementById('userModalTitle').textContent=edit?'Mitglied bearbeiten':'Mitglied anlegen';
@@ -189,6 +200,8 @@ document.getElementById('userModal').addEventListener('show.bs.modal',e=>{
   document.getElementById('userUsername').value=edit?b.dataset.username:'';
   document.getElementById('userEmail').value=edit?b.dataset.email:'';
   document.getElementById('userRole').value=edit?b.dataset.role:'member';
+  document.getElementById('userAccess').value=edit?b.dataset.access:'full';
+  toggleAccess();
   document.getElementById('userTreasurer').checked=edit&&b.dataset.treasurer==='1';
   document.getElementById('userLeader').checked=edit&&b.dataset.leader==='1';
   document.getElementById('userSecretary').checked=edit&&b.dataset.secretary==='1';

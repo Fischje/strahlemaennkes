@@ -127,7 +127,7 @@ function sektbar_is_active(PDO $pdo): bool {
 function active_spiess_push_user_ids(PDO $pdo): array {
     $d=active_spiess_delegation($pdo);
     if($d) return [(int)$d['representative_user_id']];
-    return array_map('intval',$pdo->query("SELECT id FROM users WHERE is_active=1 AND role='spiess'")->fetchAll(PDO::FETCH_COLUMN));
+    return array_map('intval',$pdo->query("SELECT id FROM users WHERE is_active=1 AND unfug_only=0 AND role='spiess'")->fetchAll(PDO::FETCH_COLUMN));
 }
 function notify_active_spiess_drink_change(PDO $pdo, array $member, string $drinkName): void {
     foreach(active_spiess_push_user_ids($pdo) as $uid){
@@ -168,7 +168,7 @@ function active_spiess_delegation(PDO $pdo): ?array {
                a.first_name assigned_first,
                a.last_name assigned_last
         FROM spiess_delegations d
-        JOIN users r ON r.id=d.representative_user_id AND r.is_active=1
+        JOIN users r ON r.id=d.representative_user_id AND r.is_active=1 AND r.unfug_only=0
         JOIN users a ON a.id=d.assigned_by
         WHERE d.active=1 AND d.ended_at IS NULL
         ORDER BY d.id DESC
@@ -326,6 +326,14 @@ function password_rule_help(): string {
     return password_rule_text().' Erlaubte Sonderzeichen: '.password_allowed_specials();
 }
 
+/** Adresse von Grober Unfug (Ziel für Konten mit Zugang „nur Grober Unfug“). */
+const UNFUG_URL = 'https://unfug.thekenbrasilianer.de';
+
+/** Hinweis für Konten, die nur Grober Unfug nutzen dürfen. */
+function unfug_only_message(): string {
+    return 'Dein Zugang gilt nur für Grober Unfug. Bitte dort anmelden: '.parse_url(UNFUG_URL, PHP_URL_HOST);
+}
+
 /** Die Felder des Benutzers, die in der Sitzung gehalten werden. */
 function session_user_from_row(array $user): array {
     return [
@@ -356,6 +364,13 @@ function refresh_session_user(PDO $pdo): void {
     $st = $pdo->prepare('SELECT * FROM users WHERE id=?');
     $st->execute([(int)$u['id']]);
     $row = $st->fetch();
+    if ($row && (int)$row['is_active'] === 1 && (int)($row['unfug_only'] ?? 0) === 1) {
+        clear_remember_login($pdo);
+        $_SESSION = [];
+        session_regenerate_id(true);
+        flash('warning', unfug_only_message());
+        return;
+    }
     if (!$row || (int)$row['is_active'] !== 1) {
         clear_remember_login($pdo);
         $_SESSION = [];
@@ -401,7 +416,7 @@ function app_maintenance(PDO $pdo): void {
 /** Gemeinsame Daten für die Live-Bestellung (Theke und Runde holen). */
 function live_drink_status(PDO $pdo): array {
     $items=[];
-    $memberRows=$pdo->query("SELECT d.id,d.name,d.emoji,u.first_name || ' ' || substr(u.last_name,1,1) || '.' person, upper(substr(trim(u.first_name),1,1) || substr(trim(u.last_name),1,1)) export_code FROM users u JOIN user_drink_preferences p ON p.user_id=u.id JOIN drinks d ON d.id=p.drink_id WHERE u.is_active=1")->fetchAll();
+    $memberRows=$pdo->query("SELECT d.id,d.name,d.emoji,u.first_name || ' ' || substr(u.last_name,1,1) || '.' person, upper(substr(trim(u.first_name),1,1) || substr(trim(u.last_name),1,1)) export_code FROM users u JOIN user_drink_preferences p ON p.user_id=u.id JOIN drinks d ON d.id=p.drink_id WHERE u.is_active=1 AND u.unfug_only=0")->fetchAll();
     $guestRows=$pdo->query("SELECT d.id,d.name,d.emoji,g.guest_name || ' (Gast)' person, 'G' || g.id export_code FROM guest_drink_orders g JOIN drinks d ON d.id=g.drink_id")->fetchAll();
     foreach(array_merge($memberRows,$guestRows) as $r){
         $id=(int)$r['id'];
@@ -412,8 +427,8 @@ function live_drink_status(PDO $pdo): array {
     }
     $rows=array_values($items);
     usort($rows,fn($a,$b)=>$b['qty']<=>$a['qty'] ?: strcasecmp($a['name'],$b['name']));
-    $total=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
-    $noneMembers=$pdo->query("SELECT u.first_name || ' ' || substr(u.last_name,1,1) || '.' AS name FROM users u LEFT JOIN user_drink_preferences p ON p.user_id=u.id WHERE u.is_active=1 AND p.drink_id IS NULL ORDER BY u.last_name,u.first_name")->fetchAll(PDO::FETCH_COLUMN);
+    $total=(int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1 AND unfug_only=0")->fetchColumn();
+    $noneMembers=$pdo->query("SELECT u.first_name || ' ' || substr(u.last_name,1,1) || '.' AS name FROM users u LEFT JOIN user_drink_preferences p ON p.user_id=u.id WHERE u.is_active=1 AND u.unfug_only=0 AND p.drink_id IS NULL ORDER BY u.last_name,u.first_name")->fetchAll(PDO::FETCH_COLUMN);
     $memberChosen=count($memberRows);
     $guestCount=count($guestRows);
     return ['updated_at'=>date(DATE_ATOM),'total'=>$total,'chosen'=>$memberChosen+$guestCount,'member_chosen'=>$memberChosen,'guest_count'=>$guestCount,'none'=>max(0,$total-$memberChosen),'none_members'=>$noneMembers,'drinks'=>$rows];
@@ -492,7 +507,7 @@ function restore_remember_login(PDO $pdo): void {
         JOIN users u ON u.id=r.user_id
         WHERE r.token_hash=?
           AND r.expires_at > CURRENT_TIMESTAMP
-          AND u.is_active=1
+          AND u.is_active=1 AND u.unfug_only=0
         LIMIT 1
     ');
     $st->execute([$hash]);
@@ -665,7 +680,7 @@ function redeem_domain_handoff(PDO $pdo, string $token): ?array {
     $st->execute([hash('sha256', $token)]);
     $userId = $st->fetchColumn();
     if ($userId === false) return null;
-    $st = $pdo->prepare('SELECT * FROM users WHERE id=? AND is_active=1');
+    $st = $pdo->prepare('SELECT * FROM users WHERE id=? AND is_active=1 AND unfug_only=0');
     $st->execute([(int)$userId]);
     return $st->fetch() ?: null;
 }
