@@ -1,11 +1,14 @@
 <?php $footerUser = empty($hideAppNav) ? current_user() : null; $footerVersion = app_version(); $footerHome = str_contains($bodyClass ?? '', 'home-page'); ?>
 </main>
 <?php if($footerUser): ?>
-<nav class="mobile-bottom-nav d-lg-none" aria-label="App-Navigation">
+<nav class="mobile-bottom-nav d-lg-none<?= unfug_event_soon($pdo) ? ' has-five' : '' ?>" aria-label="App-Navigation">
 <?php
   // Feste Schnellwahl am Handy/in der App; alles Weitere steht im Menü oben.
   $bottomPath=parse_url($_SERVER['REQUEST_URI'] ?? '/',PHP_URL_PATH) ?: '/';
-  foreach([['/dashboard.php','bi-house-door','Übersicht'],['/member-drink.php','bi-cup-straw','Mein Getränk'],['/theke.php','bi-list-check','Theke'],['/calendar.php','bi-calendar-event','Kalender'],[UNFUG_PATH,'bi-emoji-laughing','Unfug']] as [$href,$icon,$label]):
+  // „Unfug“ nur in den 30 Tagen vor einem Grober-Unfug-Event (und solange es läuft), sonst vier Knöpfe.
+  $bottomItems=[['/dashboard.php','bi-house-door','Übersicht'],['/member-drink.php','bi-cup-straw','Mein Getränk'],['/theke.php','bi-list-check','Theke'],['/calendar.php','bi-calendar-event','Kalender']];
+  if(unfug_event_soon($pdo)) $bottomItems[]=[UNFUG_PATH,'bi-emoji-laughing','Unfug'];
+  foreach($bottomItems as [$href,$icon,$label]):
     $here=$bottomPath===$href; ?>
   <a href="<?= $href ?>" class="<?= $here ? 'active' : '' ?>" <?= $here ? 'aria-current="page"' : '' ?>><i class="bi <?= $icon ?>"></i><span><?= $label ?></span></a>
 <?php endforeach; ?>

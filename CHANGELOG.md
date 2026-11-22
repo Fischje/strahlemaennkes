@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 0.7.54 – 22.11.2026
+
+- Handy-Leiste: Der Knopf „Unfug“ erscheint nur noch in den 30 Tagen vor einem Grober-Unfug-Event und solange es läuft. Sonst bleiben es vier Knöpfe.
+
 ## Beta 0.7.53 – 18.11.2026
 
 - Gelbe Stammtisch-Zeile: Während der Terminfindung erscheint sie nur noch, solange deine Stimme fehlt. Wer abgestimmt hat, sieht sie nicht mehr.

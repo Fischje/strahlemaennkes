@@ -36,6 +36,24 @@ function unfug_when(array $ev): string {
     return german_weekday_short($d) . ', ' . $d->format('d.m.Y') . (!empty($ev['start_time']) ? ' · ' . $ev['start_time'] . ' Uhr' : '');
 }
 
+/** Tage vor einem Event, ab denen der Knopf „Unfug“ in der Handy-Leiste erscheint. */
+const UNFUG_NAV_DAYS = 30;
+
+/** Ob ein veröffentlichtes Event in den nächsten UNFUG_NAV_DAYS Tagen beginnt oder gerade läuft (Knopf in der Handy-Leiste). */
+function unfug_event_soon(PDO $pdo): bool {
+    static $soon = null;
+    if ($soon !== null) return $soon;
+    if (!unfug_available($pdo)) return $soon = false;
+    $today = new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin'));
+    try {
+        $q = $pdo->prepare('SELECT 1 FROM grober_unfug.events WHERE published=1 AND starts_on <= ? AND COALESCE(ends_on, starts_on) >= ? LIMIT 1');
+        $q->execute([$today->modify('+' . UNFUG_NAV_DAYS . ' days')->format('Y-m-d'), $today->format('Y-m-d')]);
+        return $soon = (bool)$q->fetchColumn();
+    } catch (Throwable $e) {
+        return $soon = false;
+    }
+}
+
 /** Nächstes veröffentlichtes Event mit eigener Antwort und Banner (für die Übersicht) oder null. */
 function unfug_next_event(PDO $pdo, int $userId): ?array {
     if (!unfug_available($pdo)) return null;

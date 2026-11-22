@@ -50,7 +50,7 @@ button, a { touch-action: manipulation; }
 .online-dot { width:10px; height:10px; border-radius:50%; background:#b9dc79; box-shadow:0 0 0 3px rgba(255,255,255,.18); }
 .online-dot.offline { background:#ffc107; }
 .install-card { background:linear-gradient(135deg,#fff,#f3f8e9); }
-.mobile-bottom-nav { position:fixed; z-index:1040; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(5,1fr); background:rgba(255,255,255,.96); backdrop-filter:blur(16px); border-top:1px solid var(--sm-border); padding:.35rem .35rem calc(.35rem + var(--sm-safe-bottom)); box-shadow:0 -10px 32px rgba(20,20,20,.08); }
+.mobile-bottom-nav { position:fixed; z-index:1040; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(4,1fr); background:rgba(255,255,255,.96); backdrop-filter:blur(16px); border-top:1px solid var(--sm-border); padding:.35rem .35rem calc(.35rem + var(--sm-safe-bottom)); box-shadow:0 -10px 32px rgba(20,20,20,.08); }
 .mobile-bottom-nav a { color:#6b6b6b; text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; min-height:54px; border-radius:12px; font-size:.72rem; font-weight:700; }
 .mobile-bottom-nav a i { font-size:1.3rem; line-height:1; }
 .mobile-bottom-nav a.active { color:var(--sm-red); background:#fff2f2; }
@@ -384,7 +384,8 @@ body.theme-light-theke .section-title {
 
 
 /* Beta 0.9.0: Mitgliederübersicht & Kasse */
-.mobile-bottom-nav { grid-template-columns:repeat(5,1fr); }
+.mobile-bottom-nav { grid-template-columns:repeat(4,1fr); }
+.mobile-bottom-nav.has-five { grid-template-columns:repeat(5,1fr); }
 .member-card {
   background:#15191c;
   border:1px solid #343b41;
